@@ -16,14 +16,14 @@ interface Note {
   id: number;
   description: string;
   amount: number;
-  paymentDate: Date | undefined;
+  paymentDate: number | undefined;
 }
 
 const MultiplePromissoryNotes: React.FC = () => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [description, setDescription] = useState<string>("");
   const [amount, setAmount] = useState<number>(0);
-  const [paymentDate, setPaymentDate] = useState<Date | undefined>();
+  const [paymentDate, setPaymentDate] = useState<number | undefined>(undefined);
 
   const addNote = () => {
     const newNote: Note = {
@@ -60,7 +60,10 @@ const MultiplePromissoryNotes: React.FC = () => {
             value={amount}
             onChange={(e) => setAmount(parseFloat(e.target.value))}
           />
-          <DatePicker selected={paymentDate} onChange={setPaymentDate} />
+          <DatePicker 
+            selected={paymentDate} 
+            onChange={(date: number | undefined) => setPaymentDate(date)} 
+          />
           <Button onClick={addNote}>Agregar Pagaré</Button>
         </div>
         <div className="mt-4">
@@ -76,7 +79,7 @@ const MultiplePromissoryNotes: React.FC = () => {
               <p>
                 <strong>Fecha de Pago:</strong>{" "}
                 {note.paymentDate
-                  ? format(note.paymentDate, "PPP")
+                  ? format(new Date(note.paymentDate), "PPP")
                   : "No seleccionada"}
               </p>
             </div>

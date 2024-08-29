@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PromissoryNotePDF from "@/components/PromissoryNotePDF";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   Home,
   LineChart,
+  Loader2,
   Package,
   Package2,
   PanelLeft,
@@ -25,18 +26,10 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -47,55 +40,94 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
 import { DatePicker } from "../DatePicker";
 import { FullDatePicker } from "@/components/FullDatePicker";
 import { z } from "zod";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
-const promissoryNoteSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  amount: z.number().positive("Amount must be positive"),
-  payment_place: z.string().min(1, "Payment place is required"),
-  debtorName: z.string().min(1, "Debtor name is required"),
-  debtorAddress: z.string().min(1, "Debtor address is required"),
-  debtorCity: z.string().min(1, "Debtor city is required"),
-  signingDate: z.date(),
-  paymentDay: z.number().min(1).max(31),
-  numberOfMonths: z.number().positive().int(),
+const guarantorSchema = z.object({
+  name: z.string(),
+  address: z.string(),
+  city: z.string(),
+  phone: z.string(),
 });
 
-// TypeScript type derived from the Zod schema
+const promissoryNoteSchema = z.object({
+  name: z.string(),
+  amount: z.number().positive().multipleOf(0.01),
+  interestRate: z.number().min(0).max(100),
+  payment_place: z.string(),
+  debtorName: z.string(),
+  debtorAddress: z.string(),
+  debtorCity: z.string(),
+  signingDate: z.date(),
+  paymentDay: z.number(),
+  numberOfMonths: z.number(),
+  numberOfGuarantors: z.number(),
+  guarantors: z.array(guarantorSchema),
+  debtorPhone: z.string(),
+});
+
+type Guarantor = z.infer<typeof guarantorSchema>;
 type PromissoryNote = z.infer<typeof promissoryNoteSchema>;
+
+interface PromissoryNotePDFProps {
+  data: PromissoryNote;
+}
 
 export function Dashboard() {
   const [paymentDay, setPaymentDay] = useState<number | undefined>(undefined);
   const [signingDate, setSigningDate] = useState<Date | undefined>(undefined);
-
   const [formData, setFormData] = useState<PromissoryNote | null>(null);
+  const [numberOfGuarantors, setNumberOfGuarantors] = useState<number>(0);
+  const [guarantors, setGuarantors] = useState<Guarantor[]>([]);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleGuarantorChange = (
+    index: number,
+    field: keyof Guarantor,
+    value: string
+  ) => {
+    const updatedGuarantors = [...guarantors];
+    if (!updatedGuarantors[index]) {
+      updatedGuarantors[index] = { name: "", address: "", city: "", phone: "" };
+    }
+    updatedGuarantors[index][field] = value;
+    setGuarantors(updatedGuarantors);
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setIsGeneratingPDF(true);
+
     const form = event.currentTarget;
+
+    const newGuarantors: Guarantor[] = [];
+    for (let i = 0; i < numberOfGuarantors; i++) {
+      newGuarantors.push({
+        name: (
+          form.elements.namedItem(`guarantor_name_${i}`) as HTMLInputElement
+        ).value,
+        address: (
+          form.elements.namedItem(`guarantor_address_${i}`) as HTMLInputElement
+        ).value,
+        city: (
+          form.elements.namedItem(`guarantor_city_${i}`) as HTMLInputElement
+        ).value,
+        phone: (
+          form.elements.namedItem(`guarantor_phone_${i}`) as HTMLInputElement
+        ).value,
+      });
+    }
 
     const rawData: PromissoryNote = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
       amount: parseFloat(
         (form.elements.namedItem("amount") as HTMLInputElement).value
+      ),
+      interestRate: parseFloat(
+        (form.elements.namedItem("interest_rate") as HTMLInputElement).value
       ),
       payment_place: (
         form.elements.namedItem("payment_place") as HTMLInputElement
@@ -107,22 +139,37 @@ export function Dashboard() {
       ).value,
       debtorCity: (form.elements.namedItem("debt_city") as HTMLInputElement)
         .value,
+      debtorPhone: (form.elements.namedItem("debt_phone") as HTMLInputElement)
+        .value,
       signingDate: signingDate!,
       paymentDay: paymentDay!,
       numberOfMonths: parseInt(
         (form.elements.namedItem("months") as HTMLInputElement).value
       ),
+      numberOfGuarantors: numberOfGuarantors,
+      guarantors: guarantors.slice(0, numberOfGuarantors),
     };
 
     try {
       const validatedData = promissoryNoteSchema.parse(rawData);
       setFormData(validatedData);
+      setIsDialogOpen(true);
       console.log("Form data:", validatedData);
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error("Validation error:", error.errors);
+        // Handle validation errors (e.g., show error messages to the user)
       }
+    } finally {
+      setIsGeneratingPDF(false);
     }
+  };
+
+  const handleReset = () => {
+    setFormData(null);
+    setPaymentDay(undefined);
+    setSigningDate(undefined);
+    // Reset other form fields if necessary
   };
 
   return (
@@ -144,7 +191,7 @@ export function Dashboard() {
                     className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
                   >
                     <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-                    <span className="sr-only">Acme Inc</span>
+                    <span className="sr-only">Pagaré fácil</span>
                   </Link>
                   <Link
                     href="#"
@@ -186,203 +233,327 @@ export function Dashboard() {
             </Sheet>
           </header>
           <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-            <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
+            <div className="mx-auto w-full max-w-7xl">
               <div className="flex items-center gap-4">
-                <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
+                <h1 className="flex-1 shrink-0 whitespace-nowrap text-2xl font-semibold tracking-tight sm:grow-0">
                   Bienvenido a Pagaré fácil
                 </h1>
                 <Badge variant="outline" className="ml-auto sm:ml-0">
                   Beta
                 </Badge>
               </div>
-              <div className="grid gap-4 md:grid-cols-[1fr_250px] lg:gap-8">
-                <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-                  <Card x-chunk="dashboard-07-chunk-0">
-                    <CardHeader>
-                      <CardTitle>Información general</CardTitle>
-                      <CardDescription>
-                        Generá tus pagarés de forma rápida y sencilla.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-6">
-                        <div className="grid gap-3">
-                          <Label htmlFor="name">
-                            Nombre de la persona a quién deberá pagarse:
-                          </Label>
-                          <Input
-                            id="name"
-                            name="name"
-                            type="text"
-                            className="w-full"
-                            defaultValue="John Doe"
-                          />
-                        </div>
-
-                        <div className="grid gap-3">
-                          <Label htmlFor="amount">Monto</Label>
-                          <Input
-                            id="amount"
-                            type="number"
-                            defaultValue="99.99"
-                          />
-                        </div>
-                        <div className="grid gap-3">
-                          <Label htmlFor="payment_place">Lugar de pago</Label>
-                          <Input
-                            id="payment_place"
-                            defaultValue="Ciudad de México"
-                            className="w-full"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card x-chunk="dashboard-07-chunk-0">
-                    <CardHeader>
-                      <CardTitle>Datos del deudor</CardTitle>
-                      <CardDescription>
-                        Ingresa los datos del deudor
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-6">
-                        <div className="grid gap-3">
-                          <Label htmlFor="name">Nombre del deudor:</Label>
-                          <Input
-                            id="debtname"
-                            type="text"
-                            className="w-full"
-                            defaultValue="John Doe"
-                          />
-                        </div>
-                        <div className="grid gap-3">
-                          <Label htmlFor="debt_address">Dirección</Label>
-                          <Input
-                            id="debt_address"
-                            type="text"
-                            defaultValue="Calle Principal"
-                            className="w-full"
-                          />
-                        </div>
-                        <div className="grid gap-3">
-                          <Label htmlFor="debt_city">Población</Label>
-                          <Input
-                            id="debt_city"
-                            defaultValue="Ciudad de México"
-                            className="w-full"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card x-chunk="dashboard-07-chunk-1">
-                    <CardHeader>
-                      <CardTitle>Número de pagarés para generar</CardTitle>
-                      <CardDescription>
-                        Selecciona cuantas semanas/meses serán generados.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-6">
-                        <div className="grid gap-3">
-                          <Label htmlFor="signing_date">Fecha del pagaré</Label>
-                          <FullDatePicker
-                            selected={signingDate}
-                            onChange={(date) => setSigningDate(date)}
-                          />
-                        </div>
-                        <div className="grid gap-3">
-                          <Label htmlFor="payment_day">Día de pago</Label>
-                          <DatePicker
-                            selected={paymentDay}
-                            onChange={(day) => setPaymentDay(day)}
-                          />
-                        </div>
-                        <div className="grid gap-3">
-                          <Label htmlFor="months">Numero de meses</Label>
-
-                          <Input id="months" type="number" defaultValue="3" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Button type="submit">Generar pagarés</Button>
-                  <Button type="reset" variant="secondary">
-                    Cancelar
-                  </Button>
-
-                  {formData && (
-                    <PDFDownloadLink
-                      document={<PromissoryNotePDF data={formData} />}
-                      fileName="pagare-facil.pdf"
-                    >
-                      {({ blob, url, loading, error }) =>
-                        loading ? "Cargando documento..." : "Doescargar PDF"
-                      }
-                    </PDFDownloadLink>
-                  )}
-
-                  {/* <Card x-chunk="dashboard-07-chunk-2">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pt-8">
+                <Card className="col-span-full lg:col-span-1">
                   <CardHeader>
-                    <CardTitle>Recomendaciones</CardTitle>
+                    <CardTitle>Información general</CardTitle>
                     <CardDescription>
-                      Aquí puedes encontrar recomendaciones útiles
+                      Generá tus pagarés de forma rápida y sencilla.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-500">
-                          <PlusCircle className="h-6 w-6" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-sm font-semibold">
-                            Crea múltiples pagarés
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            Selecciona múltiples periodos de pago para crear
-                            varios pagarés automáticamente.
-                          </p>
-                        </div>
+                    <div className="grid gap-6">
+                      <div className="grid gap-3">
+                        <Label htmlFor="name">
+                          Nombre de la persona a quién deberá pagarse:
+                        </Label>
+                        <Input
+                          id="name"
+                          name="name"
+                          type="text"
+                          className="w-full"
+                          defaultValue="María Rodríguez"
+                        />
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-500">
-                          <Upload className="h-6 w-6" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-sm font-semibold">
-                            Sube tus propios documentos
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            Adjunta documentos adicionales como garantías o
-                            contratos.
-                          </p>
-                        </div>
+
+                      <div className="grid gap-3">
+                        <Label htmlFor="amount">Monto</Label>
+                        <Input
+                          id="amount"
+                          name="amount"
+                          type="text"
+                          pattern="\d+(\.\d{0,2})?"
+                          inputMode="decimal"
+                          placeholder="0.00"
+                        />{" "}
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-500">
-                          <Search className="h-6 w-6" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-sm font-semibold">
-                            Busca tus pagarés
-                          </h4>
-                          <p className="text-sm text-muted-foreground">
-                            Encuentra rápidamente pagarés anteriores con la
-                            búsqueda avanzada.
-                          </p>
-                        </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="interest_rate">
+                          Tasa de interés (%)
+                        </Label>
+                        <Input
+                          id="interest_rate"
+                          name="interest_rate"
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          max="100"
+                          placeholder="0.00"
+                          required
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="payment_place">Lugar de pago</Label>
+                        <Input
+                          id="payment_place"
+                          defaultValue="Ciudad de México"
+                          className="w-full"
+                        />
                       </div>
                     </div>
                   </CardContent>
-                </Card> */}
-                </div>
+                </Card>
+                <Card className="col-span-full lg:col-span-1">
+                  <CardHeader>
+                    <CardTitle>Datos del deudor</CardTitle>
+                    <CardDescription>
+                      Ingresa los datos del deudor
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-6">
+                      <div className="grid gap-3">
+                        <Label htmlFor="name">Nombre del deudor:</Label>
+                        <Input
+                          id="debtname"
+                          type="text"
+                          className="w-full"
+                          defaultValue="Carlos Sánchez"
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="debt_address">Dirección</Label>
+                        <Input
+                          id="debt_address"
+                          type="text"
+                          defaultValue="Calle Principal"
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="debt_city">Población</Label>
+                        <Input
+                          id="debt_city"
+                          defaultValue="Ciudad de México"
+                          className="w-full"
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="debt_phone">Teléfono del deudor</Label>
+                        <Input
+                          id="debt_phone"
+                          type="tel"
+                          className="w-full"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="col-span-full lg:col-span-1">
+                  <CardHeader>
+                    <CardTitle>Número de pagarés para generar</CardTitle>
+                    <CardDescription>
+                      Selecciona cuantas semanas/meses serán generados.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-6">
+                      <div className="grid gap-3">
+                        <Label htmlFor="signing_date">Fecha del pagaré</Label>
+                        <FullDatePicker
+                          selected={signingDate}
+                          onChange={(date) => setSigningDate(date)}
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="payment_day">Día de pago</Label>
+                        <DatePicker
+                          selected={paymentDay}
+                          onChange={(day) => setPaymentDay(day)}
+                        />
+                      </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="months">Numero de meses</Label>
+                        <Input id="months" type="number" defaultValue="3" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="col-span-full">
+                  <CardHeader>
+                    <CardTitle>Información de Avales</CardTitle>
+                    <CardDescription>
+                      Selecciona el número de avales y proporciona su
+                      información.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-6">
+                      <div className="grid gap-3">
+                        <Label htmlFor="number_of_guarantors">
+                          Número de Avales
+                        </Label>
+                        <Select
+                          onValueChange={(value) => {
+                            const num = parseInt(value);
+                            setNumberOfGuarantors(num);
+                            setGuarantors((prevGuarantors) => {
+                              const newGuarantors = [...prevGuarantors];
+                              while (newGuarantors.length < num) {
+                                newGuarantors.push({
+                                  name: "",
+                                  address: "",
+                                  city: "",
+                                  phone: "",
+                                });
+                              }
+                              return newGuarantors.slice(0, num);
+                            });
+                          }}
+                          value={numberOfGuarantors.toString()}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona el número de avales" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="0">0</SelectItem>
+                            <SelectItem value="1">1</SelectItem>
+                            <SelectItem value="2">2</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {[...Array(numberOfGuarantors)].map((_, index) => (
+                        <div key={index} className="grid gap-6">
+                          <h3 className="text-lg font-semibold">
+                            Aval {index + 1}
+                          </h3>
+                          <div className="grid gap-3">
+                            <Label htmlFor={`guarantor_name_${index}`}>
+                              Nombre del Aval
+                            </Label>
+                            <Input
+                              id={`guarantor_name_${index}`}
+                              type="text"
+                              className="w-full"
+                              value={guarantors[index]?.name || ""}
+                              onChange={(e) =>
+                                handleGuarantorChange(
+                                  index,
+                                  "name",
+                                  e.target.value
+                                )
+                              }
+                              required
+                            />
+                          </div>
+                          <div className="grid gap-3">
+                            <Label htmlFor={`guarantor_address_${index}`}>
+                              Dirección del Aval
+                            </Label>
+                            <Input
+                              id={`guarantor_address_${index}`}
+                              type="text"
+                              className="w-full"
+                              value={guarantors[index]?.address || ""}
+                              onChange={(e) =>
+                                handleGuarantorChange(
+                                  index,
+                                  "address",
+                                  e.target.value
+                                )
+                              }
+                              required
+                            />
+                          </div>
+                          <div className="grid gap-3">
+                            <Label htmlFor={`guarantor_city_${index}`}>
+                              Ciudad del Aval
+                            </Label>
+                            <Input
+                              id={`guarantor_city_${index}`}
+                              type="text"
+                              className="w-full"
+                              value={guarantors[index]?.city || ""}
+                              onChange={(e) =>
+                                handleGuarantorChange(
+                                  index,
+                                  "city",
+                                  e.target.value
+                                )
+                              }
+                              required
+                            />
+                          </div>
+                          <div className="grid gap-3">
+                            <Label htmlFor={`guarantor_phone_${index}`}>
+                              Teléfono del Aval
+                            </Label>
+                            <Input
+                              id={`guarantor_phone_${index}`}
+                              type="tel"
+                              className="w-full"
+                              value={guarantors[index]?.phone || ""}
+                              onChange={(e) =>
+                                handleGuarantorChange(
+                                  index,
+                                  "phone",
+                                  e.target.value
+                                )
+                              }
+                              required
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="col-span-full flex gap-4 mt-4">
+                <Button type="submit" disabled={isGeneratingPDF}>
+                  {isGeneratingPDF ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Validando...
+                    </>
+                  ) : (
+                    "Validar y generar PDF"
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleReset}
+                  disabled={isGeneratingPDF}
+                >
+                  Cancelar
+                </Button>
               </div>
             </div>
           </main>
         </div>
       </form>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>PDF generado con éxito</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {formData && (
+              <PDFDownloadLink
+                document={<PromissoryNotePDF data={formData} />}
+                fileName="pagare-facil.pdf"
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              >
+                {({ blob, url, loading, error }) =>
+                  loading ? "Preparando PDF..." : "Descargar PDF"
+                }
+              </PDFDownloadLink>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
