@@ -33,13 +33,13 @@ const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
     backgroundColor: "#ffffff",
-    padding: 8,
+    padding: 15,
   },
   pagare: {
     border: "0.5 solid #1b5e20",
     borderRadius: 2,
-    padding: 3,
-    marginBottom: 5,
+    padding: 5,
+    marginBottom: 10,
     backgroundColor: "#e8f5e9",
     width: "100%",
   },
@@ -47,13 +47,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#1b5e20",
-    color: "white",
-    padding: 2,
-    marginBottom: 2,
+    color: "black",
+    padding: 5,
+    marginBottom: 5,
   },
   headerText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: "bold",
   },
   headerRight: {
@@ -72,7 +71,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 1,
+    marginBottom: 2,
   },
   input: {
     borderBottom: "0.5 solid #1b5e20",
@@ -82,7 +81,7 @@ const styles = StyleSheet.create({
   },
   mainText: {
     fontSize: 8,
-    marginVertical: 2,
+    marginVertical: 4,
   },
   label: {
     fontSize: 7,
@@ -91,7 +90,7 @@ const styles = StyleSheet.create({
   smallText: {
     fontSize: 6,
     color: "#1b5e20",
-    marginBottom: 1,
+    marginBottom: 2,
   },
   debtorInfo: {
     border: "0.5 solid #1b5e20",
@@ -106,7 +105,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   lineContainer: {
     flex: 1,
@@ -114,17 +113,17 @@ const styles = StyleSheet.create({
   lineText: {
     fontSize: 8,
     borderBottom: "0.5 solid #1b5e20",
-    paddingBottom: 1,
+    paddingBottom: 4,
   },
   lineLabel: {
     fontSize: 7,
     color: "#1b5e20",
-    marginTop: 1,
+    marginTop: 2,
   },
   guarantorInfo: {
     border: "0.5 solid #1b5e20",
     padding: 2,
-    marginTop: 2,
+    marginTop: 4,
   },
   guarantorTitle: {
     fontSize: 7,
@@ -148,14 +147,15 @@ const styles = StyleSheet.create({
     fontSize: 7,
   },
   guarantorSignature: {
-    marginTop: 3,
+    marginTop: 6,
     borderTop: "0.5 dashed #1b5e20",
-    paddingTop: 2,
+    paddingTop: 4,
   },
   guarantorSignatureText: {
     fontSize: 7,
     color: "#1b5e20",
     textAlign: "center",
+    marginBottom: 2,
   },
   combinedRow: {
     flexDirection: "row",
@@ -191,10 +191,19 @@ const formatDate = (date: Date): string => {
   return `${day} de ${month} de ${year}`;
 };
 
+const getAdjustedPaymentDate = (baseDate: Date, paymentDay: number): Date => {
+  const year = baseDate.getFullYear();
+  const month = baseDate.getMonth();
+  const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
+  const adjustedDay = Math.min(paymentDay, lastDayOfMonth);
+  return new Date(year, month, adjustedDay);
+};
+
 const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }> = ({ data, noteNumber }) => {
   const cantidadEnLetras = formatearCantidad(data.amount);
-  const dueDate = new Date(data.signingDate);
-  dueDate.setMonth(dueDate.getMonth() + noteNumber);
+  const baseDate = new Date(data.signingDate);
+  baseDate.setMonth(baseDate.getMonth() + noteNumber - 1);
+  const dueDate = getAdjustedPaymentDate(baseDate, data.paymentDay);
 
   return (
     <View style={styles.pagare}>
@@ -224,8 +233,8 @@ const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }>
           <Text style={styles.lineLabel}>Lugar de pago</Text>
         </View>
         <View style={styles.lineContainer}>
-          <Text style={styles.lineText}>
-            {data.paymentDay} de {getSpanishMonth(dueDate.getMonth())} de {dueDate.getFullYear()}
+        <Text style={styles.lineText}>
+            {dueDate.getDate()} de {getSpanishMonth(dueDate.getMonth())} de {dueDate.getFullYear()}
           </Text>
           <Text style={styles.lineLabel}>Fecha de Pago</Text>
         </View>
@@ -274,7 +283,7 @@ const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }>
               </View>
               <View style={styles.guarantorSignature}>
                 <Text style={styles.guarantorSignatureText}>
-                  Firma del Aval {index + 1}: _____________________ 
+                  Firma del Aval {index + 1}: ________________________ 
                 </Text>
               </View>
             </View>
@@ -283,7 +292,7 @@ const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }>
       )}
 
       <View style={styles.signature}>
-        <Text style={styles.label}>Firma(s) del Deudor: ____________________</Text>
+        <Text style={styles.label}>Firma(s) del Deudor: __________________________</Text>
       </View>
     </View>
   );
