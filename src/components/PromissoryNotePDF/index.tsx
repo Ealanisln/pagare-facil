@@ -1,6 +1,6 @@
 import React from "react";
 import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
-import { formatearCantidad } from '@/lib/number-to-letter';
+import { formatearCantidad } from "@/lib/number-to-letter";
 
 type Guarantor = {
   name: string;
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     padding: 5,
     marginBottom: 10,
-    backgroundColor: "#e8f5e9",
+    backgroundColor: "#f5faf5",
     width: "100%",
   },
   header: {
@@ -50,6 +50,8 @@ const styles = StyleSheet.create({
     color: "black",
     padding: 5,
     marginBottom: 5,
+    borderRadius: 4,
+    border: "1 solid #1b5e20",
   },
   headerText: {
     fontSize: 10,
@@ -58,6 +60,14 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: "row",
     fontSize: 6,
+    alignItems: "center",
+  },
+  headerRightItem: {
+    paddingHorizontal: 4,
+  },
+  verticalLine: {
+    borderLeft: "0.5 solid #1b5e20",
+    height: "100%",
   },
   dateRow: {
     flexDirection: "row",
@@ -81,7 +91,7 @@ const styles = StyleSheet.create({
   },
   mainText: {
     fontSize: 8,
-    marginVertical: 4,
+    marginVertical: 8,
   },
   label: {
     fontSize: 7,
@@ -178,8 +188,18 @@ const styles = StyleSheet.create({
 
 const getSpanishMonth = (month: number): string => {
   const months = [
-    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre",
   ];
   return months[month];
 };
@@ -199,7 +219,10 @@ const getAdjustedPaymentDate = (baseDate: Date, paymentDay: number): Date => {
   return new Date(year, month, adjustedDay);
 };
 
-const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }> = ({ data, noteNumber }) => {
+const PromissoryNote: React.FC<{
+  data: PromissoryNoteData;
+  noteNumber: number;
+}> = ({ data, noteNumber }) => {
   const cantidadEnLetras = formatearCantidad(data.amount);
   const baseDate = new Date(data.signingDate);
   baseDate.setMonth(baseDate.getMonth() + noteNumber - 1);
@@ -210,8 +233,11 @@ const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }>
       <View style={styles.header}>
         <Text style={styles.headerText}>PAGARÉ</Text>
         <View style={styles.headerRight}>
-          <Text>No. {noteNumber} de {data.numberOfMonths}</Text>
-          <Text style={{ marginLeft: 5 }}>
+          <Text style={styles.headerRightItem}>
+            No. {noteNumber} de {data.numberOfMonths}
+          </Text>
+          <View style={styles.verticalLine} />
+          <Text style={styles.headerRightItem}>
             BUENO POR $ {data.amount.toFixed(2)}
           </Text>
         </View>
@@ -225,7 +251,8 @@ const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }>
         Lugar y fecha de expedición
       </Text>
       <Text style={styles.mainText}>
-        Debo(mos) y pagaré(mos) incondicionalmente por este Pagaré a la orden de {data.name}, la cantidad de {cantidadEnLetras}.
+        Debo(mos) y pagaré(mos) incondicionalmente por este Pagaré a la orden de{" "}
+        {data.name}, la cantidad de {cantidadEnLetras}.
       </Text>
       <View style={styles.twoLineContainer}>
         <View style={styles.lineContainer}>
@@ -233,15 +260,23 @@ const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }>
           <Text style={styles.lineLabel}>Lugar de pago</Text>
         </View>
         <View style={styles.lineContainer}>
-        <Text style={styles.lineText}>
-            {dueDate.getDate()} de {getSpanishMonth(dueDate.getMonth())} de {dueDate.getFullYear()}
+          <Text style={styles.lineText}>
+            {dueDate.getDate()} de {getSpanishMonth(dueDate.getMonth())} de{" "}
+            {dueDate.getFullYear()}
           </Text>
           <Text style={styles.lineLabel}>Fecha de Pago</Text>
         </View>
       </View>
 
       <Text style={styles.smallText}>
-        Valor recibido a mi (nuestra) entera satisfacción. Este pagaré forma parte de una serie numerada del 1 al {data.numberOfMonths} y todos están sujetos a la condición de que, al no pagarse cualquiera de ellos a su vencimiento, serán exigibles todos los que le sigan en número, además de los ya vencidos, desde la fecha de vencimiento de este documento hasta el día de su liquidación, causará intereses moratorios al tipo de {data.interestRate.toFixed(2)}% mensual, pagadero en esta ciudad juntamente con el principal.
+        Valor recibido a mi (nuestra) entera satisfacción. Este pagaré forma
+        parte de una serie numerada del 1 al {data.numberOfMonths} y todos están
+        sujetos a la condición de que, al no pagarse cualquiera de ellos a su
+        vencimiento, serán exigibles todos los que le sigan en número, además de
+        los ya vencidos, desde la fecha de vencimiento de este documento hasta
+        el día de su liquidación, causará intereses moratorios al tipo de{" "}
+        {data.interestRate.toFixed(2)}% mensual, pagadero en esta ciudad
+        juntamente con el principal.
       </Text>
 
       <View style={styles.debtorInfo}>
@@ -262,37 +297,41 @@ const PromissoryNote: React.FC<{ data: PromissoryNoteData; noteNumber: number }>
         </View>
       </View>
 
-      {data.numberOfGuarantors > 0 && data.guarantors && data.guarantors.length > 0 && (
-        <View style={styles.guarantorInfo}>
-           {data.guarantors.map((guarantor, index) => (
-            <View key={index}>
-              <Text style={styles.label}>Aval {index + 1}:</Text>
-              <View style={styles.row}>
-                <Text style={styles.label}>Nombre:</Text>
-                <Text style={styles.input}>{guarantor.name}</Text>
+      {data.numberOfGuarantors > 0 &&
+        data.guarantors &&
+        data.guarantors.length > 0 && (
+          <View style={styles.guarantorInfo}>
+            {data.guarantors.map((guarantor, index) => (
+              <View key={index}>
+                <Text style={styles.label}>Aval {index + 1}:</Text>
+                <View style={styles.row}>
+                  <Text style={styles.label}>Nombre:</Text>
+                  <Text style={styles.input}>{guarantor.name}</Text>
+                </View>
+                <View style={styles.combinedRow}>
+                  <Text style={styles.label}>Dirección:</Text>
+                  <Text style={styles.addressInput}>{guarantor.address}</Text>
+                  <Text style={styles.label}>Población:</Text>
+                  <Text style={styles.cityInput}>{guarantor.city}</Text>
+                </View>
+                <View style={styles.row}>
+                  <Text style={styles.label}>Tel:</Text>
+                  <Text style={styles.input}>{guarantor.phone}</Text>
+                </View>
+                <View style={styles.guarantorSignature}>
+                  <Text style={styles.guarantorSignatureText}>
+                    Firma del Aval {index + 1}: ________________________
+                  </Text>
+                </View>
               </View>
-              <View style={styles.combinedRow}>
-                <Text style={styles.label}>Dirección:</Text>
-                <Text style={styles.addressInput}>{guarantor.address}</Text>
-                <Text style={styles.label}>Población:</Text>
-                <Text style={styles.cityInput}>{guarantor.city}</Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.label}>Tel:</Text>
-                <Text style={styles.input}>{guarantor.phone}</Text>
-              </View>
-              <View style={styles.guarantorSignature}>
-                <Text style={styles.guarantorSignatureText}>
-                  Firma del Aval {index + 1}: ________________________ 
-                </Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      )}
+            ))}
+          </View>
+        )}
 
       <View style={styles.signature}>
-        <Text style={styles.label}>Firma(s) del Deudor: __________________________</Text>
+        <Text style={styles.label}>
+          Firma(s) del Deudor: __________________________
+        </Text>
       </View>
     </View>
   );
@@ -307,11 +346,18 @@ const PromissoryNotePDF: React.FC<PromissoryNotePDFProps> = ({ data }) => {
   return (
     <Document>
       {Array.from({ length: totalPages }, (_, pageIndex) => (
-        <Page key={pageIndex} size="LETTER" orientation="portrait" style={styles.page}>
+        <Page
+          key={pageIndex}
+          size="LETTER"
+          orientation="portrait"
+          style={styles.page}
+        >
           {Array.from({ length: pagaresPerPage }, (_, i) => {
             const noteNumber = pageIndex * pagaresPerPage + i + 1;
             if (noteNumber <= data.numberOfMonths) {
-              return <PromissoryNote key={i} data={data} noteNumber={noteNumber} />;
+              return (
+                <PromissoryNote key={i} data={data} noteNumber={noteNumber} />
+              );
             }
             return null;
           })}
