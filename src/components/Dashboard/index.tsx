@@ -49,7 +49,7 @@ const guarantorSchema = z.object({
   name: z.string(),
   address: z.string(),
   city: z.string(),
-  phone: z.string(),
+  phone: z.string().optional(),
 });
 
 const promissoryNoteSchema = z.object({
@@ -65,7 +65,7 @@ const promissoryNoteSchema = z.object({
   numberOfMonths: z.number(),
   numberOfGuarantors: z.number(),
   guarantors: z.array(guarantorSchema),
-  debtorPhone: z.string(),
+  debtorPhone: z.string().optional(),
 });
 
 type Guarantor = z.infer<typeof guarantorSchema>;
@@ -261,7 +261,6 @@ export function Dashboard() {
                           name="name"
                           type="text"
                           className="w-full"
-                          defaultValue="María Rodríguez"
                         />
                       </div>
 
@@ -293,11 +292,7 @@ export function Dashboard() {
                       </div>
                       <div className="grid gap-3">
                         <Label htmlFor="payment_place">Lugar de pago</Label>
-                        <Input
-                          id="payment_place"
-                          defaultValue="Ciudad de México"
-                          className="w-full"
-                        />
+                        <Input id="payment_place" className="w-full" />
                       </div>
                     </div>
                   </CardContent>
@@ -313,38 +308,25 @@ export function Dashboard() {
                     <div className="grid gap-6">
                       <div className="grid gap-3">
                         <Label htmlFor="name">Nombre del deudor:</Label>
-                        <Input
-                          id="debtname"
-                          type="text"
-                          className="w-full"
-                          defaultValue="Carlos Sánchez"
-                        />
+                        <Input id="debtname" type="text" className="w-full" />
                       </div>
                       <div className="grid gap-3">
                         <Label htmlFor="debt_address">Dirección</Label>
                         <Input
                           id="debt_address"
                           type="text"
-                          defaultValue="Calle Principal"
                           className="w-full"
                         />
                       </div>
                       <div className="grid gap-3">
                         <Label htmlFor="debt_city">Población</Label>
-                        <Input
-                          id="debt_city"
-                          defaultValue="Ciudad de México"
-                          className="w-full"
-                        />
+                        <Input id="debt_city" className="w-full" />
                       </div>
                       <div className="grid gap-3">
-                        <Label htmlFor="debt_phone">Teléfono del deudor</Label>
-                        <Input
-                          id="debt_phone"
-                          type="tel"
-                          className="w-full"
-                          required
-                        />
+                        <Label htmlFor="debt_phone">
+                          Teléfono del deudor (Opcional)
+                        </Label>
+                        <Input id="debt_phone" type="tel" className="w-full" />
                       </div>
                     </div>
                   </CardContent>
@@ -500,7 +482,6 @@ export function Dashboard() {
                                   e.target.value
                                 )
                               }
-                              required
                             />
                           </div>
                         </div>

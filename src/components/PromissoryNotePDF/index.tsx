@@ -6,7 +6,7 @@ type Guarantor = {
   name: string;
   address: string;
   city: string;
-  phone: string;
+  phone?: string;
 };
 
 type PromissoryNoteData = {
@@ -15,7 +15,7 @@ type PromissoryNoteData = {
   debtorAddress: string;
   debtorCity: string;
   debtorName: string;
-  debtorPhone: string;
+  debtorPhone?: string;
   name: string;
   numberOfMonths: number;
   paymentDay: number;
