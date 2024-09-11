@@ -23,8 +23,8 @@ type PromissoryNoteData = {
   signingDate: Date;
   numberOfGuarantors: number;
   guarantors: Guarantor[];
+  periodicity: "weekly" | "biweekly" | "monthly" | "quarterly" | "semiannual";
 };
-
 interface PromissoryNotePDFProps {
   data: PromissoryNoteData;
 }
@@ -188,18 +188,8 @@ const styles = StyleSheet.create({
 
 const getSpanishMonth = (month: number): string => {
   const months = [
-    "enero",
-    "febrero",
-    "marzo",
-    "abril",
-    "mayo",
-    "junio",
-    "julio",
-    "agosto",
-    "septiembre",
-    "octubre",
-    "noviembre",
-    "diciembre",
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
   ];
   return months[month];
 };
@@ -211,22 +201,55 @@ const formatDate = (date: Date): string => {
   return `${day} de ${month} de ${year}`;
 };
 
-const getAdjustedPaymentDate = (baseDate: Date, paymentDay: number): Date => {
-  const year = baseDate.getFullYear();
-  const month = baseDate.getMonth();
-  const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
-  const adjustedDay = Math.min(paymentDay, lastDayOfMonth);
-  return new Date(year, month, adjustedDay);
-};
+const calculateDueDate = (baseDate: Date, noteNumber: number, periodicity: string, paymentDay: number): Date => {
+  let dueDate = new Date(baseDate);
+  
+  switch (periodicity) {
+    case "weekly":
+      dueDate.setDate(baseDate.getDate() + (noteNumber - 1) * 7);
+      break;
+    case "biweekly":
+      dueDate.setDate(baseDate.getDate() + (noteNumber - 1) * 14);
+      break;
+    case "monthly":
+      dueDate.setMonth(baseDate.getMonth() + (noteNumber - 1));
+      break;
+    case "quarterly":
+      dueDate.setMonth(baseDate.getMonth() + (noteNumber - 1) * 3);
+      break;
+    case "semiannual":
+      dueDate.setMonth(baseDate.getMonth() + (noteNumber - 1) * 6);
+      break;
+  }
 
+  // Para periodicidad semanal y quincenal, no ajustamos al día de pago específico
+  if (periodicity !== "weekly" && periodicity !== "biweekly") {
+    // Ajustar al día de pago especificado solo para periodicidades mensuales o mayores
+    const lastDayOfMonth = new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate();
+    dueDate.setDate(Math.min(paymentDay, lastDayOfMonth));
+  }
+
+  return dueDate;
+};
 const PromissoryNote: React.FC<{
   data: PromissoryNoteData;
   noteNumber: number;
 }> = ({ data, noteNumber }) => {
   const cantidadEnLetras = formatearCantidad(data.amount);
   const baseDate = new Date(data.signingDate);
-  baseDate.setMonth(baseDate.getMonth() + noteNumber - 1);
-  const dueDate = getAdjustedPaymentDate(baseDate, data.paymentDay);
+  
+  const dueDate = calculateDueDate(baseDate, noteNumber, data.periodicity, data.paymentDay);
+
+  const periodicityText = (() => {
+    switch (data.periodicity) {
+      case "weekly": return "semanal";
+      case "biweekly": return "quincenal";
+      case "monthly": return "mensual";
+      case "quarterly": return "trimestral";
+      case "semiannual": return "semestral";
+      default: return "";
+    }
+  })();
 
   return (
     <View style={styles.pagare}>
@@ -261,14 +284,14 @@ const PromissoryNote: React.FC<{
         </View>
         <View style={styles.lineContainer}>
           <Text style={styles.lineText}>
-            {dueDate.getDate()} de {getSpanishMonth(dueDate.getMonth())} de{" "}
-            {dueDate.getFullYear()}
+            {formatDate(dueDate)}
           </Text>
           <Text style={styles.lineLabel}>Fecha de Pago</Text>
         </View>
       </View>
 
       <Text style={styles.smallText}>
+        Este pagaré es parte de una serie de pagos {periodicityText}es. 
         Valor recibido a mi (nuestra) entera satisfacción. Este pagaré forma
         parte de una serie numerada del 1 al {data.numberOfMonths} y todos están
         sujetos a la condición de que, al no pagarse cualquiera de ellos a su
@@ -339,6 +362,20 @@ const PromissoryNote: React.FC<{
 
 const PromissoryNotePDF: React.FC<PromissoryNotePDFProps> = ({ data }) => {
   console.log("PromissoryNotePDF data:", data); // For debugging
+
+  // Agregar validación básica de datos
+  if (!data || !data.numberOfMonths || data.numberOfMonths < 1) {
+    console.error("Datos de pagaré inválidos", data);
+    return (
+      <Document>
+        <Page size="LETTER">
+          <View>
+            <Text>Error: Datos de pagaré inválidos o incompletos</Text>
+          </View>
+        </Page>
+      </Document>
+    );
+  }
 
   const pagaresPerPage = 3;
   const totalPages = Math.ceil(data.numberOfMonths / pagaresPerPage);

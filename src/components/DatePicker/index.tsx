@@ -43,7 +43,7 @@ export function DatePicker({ selected, onChange }: DatePickerProps) {
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {selected ? `Día ${selected} de cada mes` : <span>Selecciona el día</span>}
+          {selected ? `Día ${selected}` : <span>Selecciona el día</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

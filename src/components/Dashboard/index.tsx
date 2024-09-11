@@ -44,6 +44,7 @@ import { DatePicker } from "../DatePicker";
 import { FullDatePicker } from "@/components/FullDatePicker";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import MultiplePromissoryNotes from "@/components/MultiplePromissoryNotes";
 
 const guarantorSchema = z.object({
   name: z.string(),
@@ -62,7 +63,14 @@ const promissoryNoteSchema = z.object({
   debtorCity: z.string(),
   signingDate: z.date(),
   paymentDay: z.number(),
-  numberOfMonths: z.number(),
+  periodicity: z.enum([
+    "weekly",
+    "biweekly",
+    "monthly",
+    "quarterly",
+    "semiannual",
+  ]),
+  numberOfMonths: z.number().positive(),
   numberOfGuarantors: z.number(),
   guarantors: z.array(guarantorSchema),
   debtorPhone: z.string().optional(),
@@ -83,6 +91,8 @@ export function Dashboard() {
   const [guarantors, setGuarantors] = useState<Guarantor[]>([]);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [periodicity, setPeriodicity] = useState<string>("monthly");
+  const [numberOfMonths, setNumberOfMonths] = useState<number>(1);
 
   const handleGuarantorChange = (
     index: number,
@@ -143,9 +153,13 @@ export function Dashboard() {
         .value,
       signingDate: signingDate!,
       paymentDay: paymentDay!,
-      numberOfMonths: parseInt(
-        (form.elements.namedItem("months") as HTMLInputElement).value
-      ),
+      periodicity: periodicity as
+        | "weekly"
+        | "biweekly"
+        | "monthly"
+        | "quarterly"
+        | "semiannual",
+      numberOfMonths: numberOfMonths,
       numberOfGuarantors: numberOfGuarantors,
       guarantors: guarantors.slice(0, numberOfGuarantors),
     };
@@ -158,7 +172,6 @@ export function Dashboard() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         console.error("Validation error:", error.errors);
-        // Handle validation errors (e.g., show error messages to the user)
       }
     } finally {
       setIsGeneratingPDF(false);
@@ -169,7 +182,7 @@ export function Dashboard() {
     setFormData(null);
     setPaymentDay(undefined);
     setSigningDate(undefined);
-    // Reset other form fields if necessary
+    setPeriodicity("monthly");
   };
 
   return (
@@ -273,7 +286,7 @@ export function Dashboard() {
                           pattern="\d+(\.\d{0,2})?"
                           inputMode="decimal"
                           placeholder="0.00"
-                        />{" "}
+                        />
                       </div>
                       <div className="grid gap-3">
                         <Label htmlFor="interest_rate">
@@ -333,9 +346,9 @@ export function Dashboard() {
                 </Card>
                 <Card className="col-span-full lg:col-span-1">
                   <CardHeader>
-                    <CardTitle>Número de pagarés para generar</CardTitle>
+                    <CardTitle>Configuración de pagarés</CardTitle>
                     <CardDescription>
-                      Selecciona cuantas semanas/meses serán generados.
+                      Configura la periodicidad y número de pagarés a generar.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -355,8 +368,40 @@ export function Dashboard() {
                         />
                       </div>
                       <div className="grid gap-3">
-                        <Label htmlFor="months">Numero de meses</Label>
-                        <Input id="months" type="number" defaultValue="3" />
+                        <Label htmlFor="periodicity">Periodicidad</Label>
+                        <Select
+                          onValueChange={setPeriodicity}
+                          value={periodicity}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona la periodicidad" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="weekly">Semanal</SelectItem>
+                            <SelectItem value="biweekly">Quincenal</SelectItem>
+                            <SelectItem value="monthly">Mensual</SelectItem>
+                            <SelectItem value="quarterly">
+                              Trimestral
+                            </SelectItem>
+                            <SelectItem value="semiannual">
+                              Semestral
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-3">
+                        <Label htmlFor="number_of_months">
+                          Número de períodos
+                        </Label>
+                        <Input
+                          id="number_of_months"
+                          type="number"
+                          value={numberOfMonths}
+                          onChange={(e) =>
+                            setNumberOfMonths(parseInt(e.target.value))
+                          }
+                          min="1"
+                        />
                       </div>
                     </div>
                   </CardContent>
