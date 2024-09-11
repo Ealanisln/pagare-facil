@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     border: "1 solid #1b5e20",
   },
   headerText: {
-    fontSize: 10,
+    fontSize: 8,
     fontWeight: "bold",
   },
   headerRight: {
@@ -90,8 +90,8 @@ const styles = StyleSheet.create({
     fontSize: 6,
   },
   mainText: {
-    fontSize: 8,
-    marginVertical: 8,
+    fontSize: 7,
+    marginVertical: 6,
   },
   label: {
     fontSize: 7,
@@ -110,7 +110,10 @@ const styles = StyleSheet.create({
   signature: {
     alignItems: "flex-end",
     marginTop: 3,
+    marginBottom: 5, // Espacio adicional para las líneas
+    fontSize: 6, // Reduce el tamaño del texto aquí
   },
+  
   twoLineContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -123,7 +126,7 @@ const styles = StyleSheet.create({
   lineText: {
     fontSize: 8,
     borderBottom: "0.5 solid #1b5e20",
-    paddingBottom: 4,
+    paddingBottom: 1,
   },
   lineLabel: {
     fontSize: 7,
@@ -158,7 +161,6 @@ const styles = StyleSheet.create({
   },
   guarantorSignature: {
     marginTop: 6,
-    borderTop: "0.5 dashed #1b5e20",
     paddingTop: 4,
   },
   guarantorSignatureText: {
@@ -265,18 +267,22 @@ const PromissoryNote: React.FC<{
           </Text>
         </View>
       </View>
+
       <View style={styles.dateRow}>
         <Text style={styles.dateText}>
           En {data.payment_place} a {formatDate(data.signingDate)}
         </Text>
       </View>
+      
       <Text style={[styles.label, { textAlign: "right" }]}>
         Lugar y fecha de expedición
       </Text>
+
       <Text style={styles.mainText}>
         Debo(mos) y pagaré(mos) incondicionalmente por este Pagaré a la orden de{" "}
         {data.name}, la cantidad de {cantidadEnLetras}.
       </Text>
+
       <View style={styles.twoLineContainer}>
         <View style={styles.lineContainer}>
           <Text style={styles.lineText}>{data.payment_place}</Text>
@@ -352,10 +358,11 @@ const PromissoryNote: React.FC<{
         )}
 
       <View style={styles.signature}>
-        <Text style={styles.label}>
-          Firma(s) del Deudor: __________________________
-        </Text>
-      </View>
+  <Text style={[ { marginBottom: 8 }]}>
+    Firma del Deudor
+  </Text>
+</View>
+
     </View>
   );
 };
