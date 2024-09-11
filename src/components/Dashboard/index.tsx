@@ -44,7 +44,6 @@ import { DatePicker } from "../DatePicker";
 import { FullDatePicker } from "@/components/FullDatePicker";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import MultiplePromissoryNotes from "@/components/MultiplePromissoryNotes";
 
 const guarantorSchema = z.object({
   name: z.string(),
@@ -62,7 +61,7 @@ const promissoryNoteSchema = z.object({
   debtorAddress: z.string(),
   debtorCity: z.string(),
   signingDate: z.date(),
-  paymentDay: z.number(),
+  paymentDay: z.number().min(1).max(31),
   periodicity: z.enum([
     "weekly",
     "biweekly",
@@ -74,14 +73,11 @@ const promissoryNoteSchema = z.object({
   numberOfGuarantors: z.number(),
   guarantors: z.array(guarantorSchema),
   debtorPhone: z.string().optional(),
+  firstPaymentDate: z.date(),
 });
 
 type Guarantor = z.infer<typeof guarantorSchema>;
 type PromissoryNote = z.infer<typeof promissoryNoteSchema>;
-
-interface PromissoryNotePDFProps {
-  data: PromissoryNote;
-}
 
 export function Dashboard() {
   const [paymentDay, setPaymentDay] = useState<number | undefined>(undefined);
@@ -105,6 +101,38 @@ export function Dashboard() {
     }
     updatedGuarantors[index][field] = value;
     setGuarantors(updatedGuarantors);
+  };
+
+  const calculateFirstPaymentDate = (
+    signingDate: Date,
+    paymentDay: number,
+    periodicity: string
+  ) => {
+    let firstPaymentDate = new Date(signingDate);
+    firstPaymentDate.setDate(paymentDay);
+
+    // If the calculated date is not after the signing date, move to the next period
+    while (firstPaymentDate <= signingDate) {
+      switch (periodicity) {
+        case "weekly":
+          firstPaymentDate.setDate(firstPaymentDate.getDate() + 7);
+          break;
+        case "biweekly":
+          firstPaymentDate.setDate(firstPaymentDate.getDate() + 14);
+          break;
+        case "monthly":
+          firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 1);
+          break;
+        case "quarterly":
+          firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 3);
+          break;
+        case "semiannual":
+          firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 6);
+          break;
+      }
+    }
+
+    return firstPaymentDate;
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -131,7 +159,14 @@ export function Dashboard() {
       });
     }
 
-    const rawData: PromissoryNote = {
+    const periodicityValue = periodicity as
+      | "weekly"
+      | "biweekly"
+      | "monthly"
+      | "quarterly"
+      | "semiannual";
+
+    const rawData = {
       name: (form.elements.namedItem("name") as HTMLInputElement).value,
       amount: parseFloat(
         (form.elements.namedItem("amount") as HTMLInputElement).value
@@ -153,19 +188,25 @@ export function Dashboard() {
         .value,
       signingDate: signingDate!,
       paymentDay: paymentDay!,
-      periodicity: periodicity as
-        | "weekly"
-        | "biweekly"
-        | "monthly"
-        | "quarterly"
-        | "semiannual",
+      periodicity: periodicityValue,
       numberOfMonths: numberOfMonths,
       numberOfGuarantors: numberOfGuarantors,
-      guarantors: guarantors.slice(0, numberOfGuarantors),
+      guarantors: newGuarantors,
     };
 
     try {
-      const validatedData = promissoryNoteSchema.parse(rawData);
+      const firstPaymentDate = calculateFirstPaymentDate(
+        rawData.signingDate,
+        rawData.paymentDay,
+        rawData.periodicity
+      );
+      const dataToValidate: PromissoryNote = {
+        ...rawData,
+        firstPaymentDate,
+      };
+
+      const validatedData = promissoryNoteSchema.parse(dataToValidate);
+
       setFormData(validatedData);
       setIsDialogOpen(true);
       console.log("Form data:", validatedData);

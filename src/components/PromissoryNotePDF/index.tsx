@@ -21,6 +21,7 @@ type PromissoryNoteData = {
   paymentDay: number;
   payment_place: string;
   signingDate: Date;
+  firstPaymentDate: Date; 
   numberOfGuarantors: number;
   guarantors: Guarantor[];
   periodicity: "weekly" | "biweekly" | "monthly" | "quarterly" | "semiannual";
@@ -203,44 +204,44 @@ const formatDate = (date: Date): string => {
   return `${day} de ${month} de ${year}`;
 };
 
-const calculateDueDate = (baseDate: Date, noteNumber: number, periodicity: string, paymentDay: number): Date => {
-  let dueDate = new Date(baseDate);
+const calculateDueDate = (firstPaymentDate: Date, noteNumber: number, periodicity: string, paymentDay: number): Date => {
+  let dueDate = new Date(firstPaymentDate);
   
   switch (periodicity) {
     case "weekly":
-      dueDate.setDate(baseDate.getDate() + (noteNumber - 1) * 7);
+      dueDate.setDate(dueDate.getDate() + (noteNumber - 1) * 7);
       break;
     case "biweekly":
-      dueDate.setDate(baseDate.getDate() + (noteNumber - 1) * 14);
+      dueDate.setDate(dueDate.getDate() + (noteNumber - 1) * 14);
       break;
     case "monthly":
-      dueDate.setMonth(baseDate.getMonth() + (noteNumber - 1));
+      dueDate.setMonth(dueDate.getMonth() + (noteNumber - 1));
       break;
     case "quarterly":
-      dueDate.setMonth(baseDate.getMonth() + (noteNumber - 1) * 3);
+      dueDate.setMonth(dueDate.getMonth() + (noteNumber - 1) * 3);
       break;
     case "semiannual":
-      dueDate.setMonth(baseDate.getMonth() + (noteNumber - 1) * 6);
+      dueDate.setMonth(dueDate.getMonth() + (noteNumber - 1) * 6);
       break;
   }
 
-  // Para periodicidad semanal y quincenal, no ajustamos al día de pago específico
+  // For weekly and biweekly, we don't adjust to the specific payment day
   if (periodicity !== "weekly" && periodicity !== "biweekly") {
-    // Ajustar al día de pago especificado solo para periodicidades mensuales o mayores
+    // Adjust to the specified payment day only for monthly or longer periodicities
     const lastDayOfMonth = new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate();
     dueDate.setDate(Math.min(paymentDay, lastDayOfMonth));
   }
 
   return dueDate;
 };
+
 const PromissoryNote: React.FC<{
   data: PromissoryNoteData;
   noteNumber: number;
 }> = ({ data, noteNumber }) => {
   const cantidadEnLetras = formatearCantidad(data.amount);
-  const baseDate = new Date(data.signingDate);
   
-  const dueDate = calculateDueDate(baseDate, noteNumber, data.periodicity, data.paymentDay);
+  const dueDate = calculateDueDate(data.firstPaymentDate, noteNumber, data.periodicity, data.paymentDay);
 
   const periodicityText = (() => {
     switch (data.periodicity) {
