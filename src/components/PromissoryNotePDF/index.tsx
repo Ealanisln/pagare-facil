@@ -88,19 +88,19 @@ const DebtorInfo: React.FC<{
   debtorPhone?: string 
 }> = ({ debtorName, debtorAddress, debtorCity, debtorPhone }) => (
   <View style={styles.debtorInfo}>
-    <Text style={styles.label}>Nombre y datos del deudor:</Text>
+    <Text style={[styles.label, { marginBottom: 2 }]}>Nombre y datos del deudor:</Text>
     <View style={styles.row}>
-      <Text style={styles.label}>Nombre:</Text>
+      <Text style={styles.label}>Nombre: </Text>
       <Text style={styles.input}>{debtorName}</Text>
     </View>
     <View style={styles.combinedRow}>
-      <Text style={styles.label}>Dirección:</Text>
+    <Text style={[styles.label, { marginBottom: 2 }]}>Dirección: </Text>
       <Text style={styles.addressInput}>{debtorAddress}</Text>
-      <Text style={styles.label}>Población:</Text>
+      <Text style={styles.label}>Población:  </Text>
       <Text style={styles.cityInput}>{debtorCity}</Text>
     </View>
     <View style={styles.row}>
-      <Text style={styles.label}>Tel:</Text>
+    <Text style={[styles.label, { marginBottom: 3 }]}>Teléfono: </Text>
       <Text style={styles.input}>{debtorPhone}</Text>
     </View>
   </View>
@@ -111,19 +111,19 @@ const GuarantorInfo: React.FC<{ guarantors: Guarantor[] }> = ({ guarantors }) =>
   <View style={styles.guarantorInfo}>
     {guarantors.map((guarantor, index) => (
       <View key={index}>
-        <Text style={styles.label}>Aval {index + 1}:</Text>
+        <Text style={[styles.label, { marginBottom: 2 }]}>Aval {index + 1}:</Text>
         <View style={styles.row}>
-          <Text style={styles.label}>Nombre:</Text>
+          <Text style={[styles.label, { marginBottom: 2 }]}>Nombre: </Text>
           <Text style={styles.input}>{guarantor.name}</Text>
         </View>
         <View style={styles.combinedRow}>
-          <Text style={styles.label}>Dirección:</Text>
+          <Text style={[styles.label, { marginBottom: 2 }]}>Dirección: </Text>
           <Text style={styles.addressInput}>{guarantor.address}</Text>
-          <Text style={styles.label}>Población:</Text>
+          <Text style={styles.label}>Población:  </Text>
           <Text style={styles.cityInput}>{guarantor.city}</Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.label}>Tel:</Text>
+          <Text style={[styles.label, { marginBottom: 3 }]}>Tel: </Text>
           <Text style={styles.input}>{guarantor.phone}</Text>
         </View>
         <View style={styles.guarantorSignature}>

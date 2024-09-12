@@ -7,20 +7,20 @@ export const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#ffffff",
     padding: 10,
-    paddingTop: 20, // Aumenta el margen superior
+    paddingTop: 10, // Aumenta el margen superior
   },
   pageWithGuarantor: {
     flexDirection: "column",
     backgroundColor: "#ffffff",
     padding: 10,
-    paddingTop: 20, // Aumenta el margen superior
+    paddingTop: 15, // Aumenta el margen superior
   },
   pagareWithoutGuarantor: {
     border: "0.5 solid #1b5e20",
     borderRadius: 2,
     padding: 9,
-    marginBottom: 15,
-    backgroundColor: "#f5faf5",
+    marginBottom: 10,
+    backgroundColor: "#fdfdfd",
     width: "100%",
   },
   pagareWithGuarantor: {
@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
     borderRadius: 2,
     padding: 7,
     marginBottom: 15,
-    backgroundColor: "#f5faf5",
+    backgroundColor: "#fdfdfd",
     width: "100%",
   },
   header: {
@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
   },
   headerRight: {
     flexDirection: "row",
-    fontSize: 6,
+    fontSize: 9,
     alignItems: "center",
   },
   headerRightItem: {
@@ -63,13 +63,13 @@ export const styles = StyleSheet.create({
     marginBottom: 1,
   },
   dateText: {
-    fontSize: 8,
+    fontSize: 9,
     textAlign: "right",
   },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 4,
+    marginBottom: 5,
   },
   input: {
     borderBottom: "0.5 solid #1b5e20",
@@ -92,14 +92,14 @@ export const styles = StyleSheet.create({
   },
   debtorInfo: {
     border: "0.5 solid #1b5e20",
-    padding: 2,
-    marginTop: 2,
+    padding: 3,
+    marginTop: 3,
   },
   signature: {
     alignItems: "flex-end",
     marginTop: 6,
     marginBottom: 6,
-    fontSize: 7,
+    fontSize: 9,
   },
   twoLineContainer: {
     flexDirection: "row",
@@ -165,12 +165,12 @@ export const styles = StyleSheet.create({
     borderBottom: "0.5 solid #1b5e20",
     flex: 2,
     marginLeft: 2,
-    fontSize: 7,
+    fontSize: 8,
   },
   cityInput: {
     borderBottom: "0.5 solid #1b5e20",
     flex: 1,
     marginLeft: 2,
-    fontSize: 7,
+    fontSize: 8,
   },
 });
