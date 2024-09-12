@@ -1,377 +1,190 @@
+// src/components/PromissoryNotePDF/index.tsx
+
 import React from "react";
-import { Page, Text, View, Document, StyleSheet } from "@react-pdf/renderer";
+import { Page, Text, View, Document } from "@react-pdf/renderer";
 import { formatearCantidad } from "@/lib/number-to-letter";
+import { styles } from "./styles";
+import { 
+  PromissoryNoteData, 
+  Guarantor, 
+  formatDate, 
+  calculateDueDate, 
+  getPeriodicityText 
+} from "./utils";
 
-type Guarantor = {
-  name: string;
-  address: string;
-  city: string;
-  phone?: string;
-};
-
-type PromissoryNoteData = {
-  amount: number;
-  interestRate: number;
-  debtorAddress: string;
-  debtorCity: string;
-  debtorName: string;
-  debtorPhone?: string;
-  name: string;
-  numberOfMonths: number;
-  paymentDay: number;
-  payment_place: string;
-  signingDate: Date;
-  firstPaymentDate: Date; 
-  numberOfGuarantors: number;
-  guarantors: Guarantor[];
-  periodicity: "weekly" | "biweekly" | "monthly" | "quarterly" | "semiannual";
-};
-interface PromissoryNotePDFProps {
-  data: PromissoryNoteData;
-}
-
-const styles = StyleSheet.create({
-  page: {
-    flexDirection: "column",
-    backgroundColor: "#ffffff",
-    padding: 15,
-  },
-  pagare: {
-    border: "0.5 solid #1b5e20",
-    borderRadius: 2,
-    padding: 5,
-    marginBottom: 10,
-    backgroundColor: "#f5faf5",
-    width: "100%",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    color: "black",
-    padding: 5,
-    marginBottom: 5,
-    borderRadius: 4,
-    border: "1 solid #1b5e20",
-  },
-  headerText: {
-    fontSize: 8,
-    fontWeight: "bold",
-  },
-  headerRight: {
-    flexDirection: "row",
-    fontSize: 6,
-    alignItems: "center",
-  },
-  headerRightItem: {
-    paddingHorizontal: 4,
-  },
-  verticalLine: {
-    borderLeft: "0.5 solid #1b5e20",
-    height: "100%",
-  },
-  dateRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginBottom: 1,
-  },
-  dateText: {
-    fontSize: 7,
-    textAlign: "right",
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 2,
-  },
-  input: {
-    borderBottom: "0.5 solid #1b5e20",
-    flex: 1,
-    marginLeft: 2,
-    fontSize: 6,
-  },
-  mainText: {
-    fontSize: 7,
-    marginVertical: 6,
-  },
-  label: {
-    fontSize: 7,
-    color: "#1b5e20",
-  },
-  smallText: {
-    fontSize: 6,
-    color: "#1b5e20",
-    marginBottom: 2,
-  },
-  debtorInfo: {
-    border: "0.5 solid #1b5e20",
-    padding: 2,
-    marginTop: 1,
-  },
-  signature: {
-    alignItems: "flex-end",
-    marginTop: 3,
-    marginBottom: 5, // Espacio adicional para las líneas
-    fontSize: 6, // Reduce el tamaño del texto aquí
-  },
-  
-  twoLineContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: 4,
-  },
-  lineContainer: {
-    flex: 1,
-  },
-  lineText: {
-    fontSize: 8,
-    borderBottom: "0.5 solid #1b5e20",
-    paddingBottom: 1,
-  },
-  lineLabel: {
-    fontSize: 7,
-    color: "#1b5e20",
-    marginTop: 2,
-  },
-  guarantorInfo: {
-    border: "0.5 solid #1b5e20",
-    padding: 2,
-    marginTop: 4,
-  },
-  guarantorTitle: {
-    fontSize: 7,
-    fontWeight: "bold",
-    color: "#1b5e20",
-    marginBottom: 1,
-  },
-  inlineRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 1,
-  },
-  inlineLabel: {
-    fontSize: 7,
-    color: "#1b5e20",
-  },
-  inlineInput: {
-    borderBottom: "0.5 solid #1b5e20",
-    flex: 1,
-    marginLeft: 2,
-    fontSize: 7,
-  },
-  guarantorSignature: {
-    marginTop: 6,
-    paddingTop: 4,
-  },
-  guarantorSignatureText: {
-    fontSize: 7,
-    color: "#1b5e20",
-    textAlign: "center",
-    marginBottom: 2,
-  },
-  combinedRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 1,
-  },
-  addressInput: {
-    borderBottom: "0.5 solid #1b5e20",
-    flex: 2,
-    marginLeft: 2,
-    fontSize: 6,
-  },
-  cityInput: {
-    borderBottom: "0.5 solid #1b5e20",
-    flex: 1,
-    marginLeft: 2,
-    fontSize: 6,
-  },
-});
-
-const getSpanishMonth = (month: number): string => {
-  const months = [
-    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-  ];
-  return months[month];
-};
-
-const formatDate = (date: Date): string => {
-  const day = date.getDate();
-  const month = getSpanishMonth(date.getMonth());
-  const year = date.getFullYear();
-  return `${day} de ${month} de ${year}`;
-};
-
-const calculateDueDate = (firstPaymentDate: Date, noteNumber: number, periodicity: string, paymentDay: number): Date => {
-  let dueDate = new Date(firstPaymentDate);
-  
-  switch (periodicity) {
-    case "weekly":
-      dueDate.setDate(dueDate.getDate() + (noteNumber - 1) * 7);
-      break;
-    case "biweekly":
-      dueDate.setDate(dueDate.getDate() + (noteNumber - 1) * 14);
-      break;
-    case "monthly":
-      dueDate.setMonth(dueDate.getMonth() + (noteNumber - 1));
-      break;
-    case "quarterly":
-      dueDate.setMonth(dueDate.getMonth() + (noteNumber - 1) * 3);
-      break;
-    case "semiannual":
-      dueDate.setMonth(dueDate.getMonth() + (noteNumber - 1) * 6);
-      break;
-  }
-
-  // For weekly and biweekly, we don't adjust to the specific payment day
-  if (periodicity !== "weekly" && periodicity !== "biweekly") {
-    // Adjust to the specified payment day only for monthly or longer periodicities
-    const lastDayOfMonth = new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate();
-    dueDate.setDate(Math.min(paymentDay, lastDayOfMonth));
-  }
-
-  return dueDate;
-};
-
-const PromissoryNote: React.FC<{
-  data: PromissoryNoteData;
-  noteNumber: number;
-}> = ({ data, noteNumber }) => {
-  const cantidadEnLetras = formatearCantidad(data.amount);
-  
-  const dueDate = calculateDueDate(data.firstPaymentDate, noteNumber, data.periodicity, data.paymentDay);
-
-  const periodicityText = (() => {
-    switch (data.periodicity) {
-      case "weekly": return "semanal";
-      case "biweekly": return "quincenal";
-      case "monthly": return "mensual";
-      case "quarterly": return "trimestral";
-      case "semiannual": return "semestral";
-      default: return "";
-    }
-  })();
-
-  return (
-    <View style={styles.pagare}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>PAGARÉ</Text>
-        <View style={styles.headerRight}>
-          <Text style={styles.headerRightItem}>
-            No. {noteNumber} de {data.numberOfMonths}
-          </Text>
-          <View style={styles.verticalLine} />
-          <Text style={styles.headerRightItem}>
-            BUENO POR $ {data.amount.toFixed(2)}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.dateRow}>
-        <Text style={styles.dateText}>
-          En {data.payment_place} a {formatDate(data.signingDate)}
-        </Text>
-      </View>
-      
-      <Text style={[styles.label, { textAlign: "right" }]}>
-        Lugar y fecha de expedición
+// Header Component
+const Header: React.FC<{ noteNumber: number; totalNotes: number; amount: number }> = ({ noteNumber, totalNotes, amount }) => (
+  <View style={styles.header}>
+    <Text style={styles.headerText}>PAGARÉ</Text>
+    <View style={styles.headerRight}>
+      <Text style={styles.headerRightItem}>
+        No. {noteNumber} de {totalNotes}
       </Text>
-
-      <Text style={styles.mainText}>
-        Debo(mos) y pagaré(mos) incondicionalmente por este Pagaré a la orden de{" "}
-        {data.name}, la cantidad de {cantidadEnLetras}.
+      <View style={styles.verticalLine} />
+      <Text style={styles.headerRightItem}>
+        BUENO POR $ {amount.toFixed(2)}
       </Text>
+    </View>
+  </View>
+);
 
-      <View style={styles.twoLineContainer}>
-        <View style={styles.lineContainer}>
-          <Text style={styles.lineText}>{data.payment_place}</Text>
-          <Text style={styles.lineLabel}>Lugar de pago</Text>
-        </View>
-        <View style={styles.lineContainer}>
-          <Text style={styles.lineText}>
-            {formatDate(dueDate)}
-          </Text>
-          <Text style={styles.lineLabel}>Fecha de Pago</Text>
-        </View>
-      </View>
+// Date Row Component
+const DateRow: React.FC<{ paymentPlace: string; signingDate: Date }> = ({ paymentPlace, signingDate }) => (
+  <View style={styles.dateRow}>
+    <Text style={styles.dateText}>
+      En {paymentPlace} a {formatDate(signingDate)}
+    </Text>
+  </View>
+);
 
-      <Text style={styles.smallText}>
-        Este pagaré es parte de una serie de pagos {periodicityText}es. 
-        Valor recibido a mi (nuestra) entera satisfacción. Este pagaré forma
-        parte de una serie numerada del 1 al {data.numberOfMonths} y todos están
-        sujetos a la condición de que, al no pagarse cualquiera de ellos a su
-        vencimiento, serán exigibles todos los que le sigan en número, además de
-        los ya vencidos, desde la fecha de vencimiento de este documento hasta
-        el día de su liquidación, causará intereses moratorios al tipo de{" "}
-        {data.interestRate.toFixed(2)}% mensual, pagadero en esta ciudad
-        juntamente con el principal.
+// Main Text Component
+const MainText: React.FC<{ name: string; amount: number }> = ({ name, amount }) => (
+  <Text style={styles.mainText}>
+    Debo(mos) y pagaré(mos) incondicionalmente por este Pagaré a la orden de{" "}
+    {name}, la cantidad de {formatearCantidad(amount)}.
+  </Text>
+);
+
+// Two Line Container Component
+const TwoLineContainer: React.FC<{ paymentPlace: string; dueDate: Date }> = ({ paymentPlace, dueDate }) => (
+  <View style={styles.twoLineContainer}>
+    <View style={styles.lineContainer}>
+      <Text style={styles.lineText}>{paymentPlace}</Text>
+      <Text style={styles.lineLabel}>Lugar de pago</Text>
+    </View>
+    <View style={styles.lineContainer}>
+      <Text style={styles.lineText}>
+        {formatDate(dueDate)}
       </Text>
+      <Text style={styles.lineLabel}>Fecha de Pago</Text>
+    </View>
+  </View>
+);
 
-      <View style={styles.debtorInfo}>
-        <Text style={styles.label}>Nombre y datos del deudor:</Text>
+// Small Text Component
+const SmallText: React.FC<{ 
+  periodicity: string; 
+  numberOfMonths: number; 
+  interestRate: number 
+}> = ({ periodicity, numberOfMonths, interestRate }) => (
+  <Text style={styles.smallText}>
+    Este pagaré es parte de una serie de pagos {getPeriodicityText(periodicity)}es. 
+    Valor recibido a mi (nuestra) entera satisfacción. Este pagaré forma
+    parte de una serie numerada del 1 al {numberOfMonths} y todos están
+    sujetos a la condición de que, al no pagarse cualquiera de ellos a su
+    vencimiento, serán exigibles todos los que le sigan en número, además de
+    los ya vencidos, desde la fecha de vencimiento de este documento hasta
+    el día de su liquidación, causará intereses moratorios al tipo de{" "}
+    {interestRate.toFixed(2)}% mensual, pagadero en esta ciudad
+    juntamente con el principal.
+  </Text>
+);
+
+// Debtor Info Component
+const DebtorInfo: React.FC<{ 
+  debtorName: string; 
+  debtorAddress: string; 
+  debtorCity: string; 
+  debtorPhone?: string 
+}> = ({ debtorName, debtorAddress, debtorCity, debtorPhone }) => (
+  <View style={styles.debtorInfo}>
+    <Text style={styles.label}>Nombre y datos del deudor:</Text>
+    <View style={styles.row}>
+      <Text style={styles.label}>Nombre:</Text>
+      <Text style={styles.input}>{debtorName}</Text>
+    </View>
+    <View style={styles.combinedRow}>
+      <Text style={styles.label}>Dirección:</Text>
+      <Text style={styles.addressInput}>{debtorAddress}</Text>
+      <Text style={styles.label}>Población:</Text>
+      <Text style={styles.cityInput}>{debtorCity}</Text>
+    </View>
+    <View style={styles.row}>
+      <Text style={styles.label}>Tel:</Text>
+      <Text style={styles.input}>{debtorPhone}</Text>
+    </View>
+  </View>
+);
+
+// Guarantor Info Component
+const GuarantorInfo: React.FC<{ guarantors: Guarantor[] }> = ({ guarantors }) => (
+  <View style={styles.guarantorInfo}>
+    {guarantors.map((guarantor, index) => (
+      <View key={index}>
+        <Text style={styles.label}>Aval {index + 1}:</Text>
         <View style={styles.row}>
           <Text style={styles.label}>Nombre:</Text>
-          <Text style={styles.input}>{data.debtorName}</Text>
+          <Text style={styles.input}>{guarantor.name}</Text>
         </View>
         <View style={styles.combinedRow}>
           <Text style={styles.label}>Dirección:</Text>
-          <Text style={styles.addressInput}>{data.debtorAddress}</Text>
+          <Text style={styles.addressInput}>{guarantor.address}</Text>
           <Text style={styles.label}>Población:</Text>
-          <Text style={styles.cityInput}>{data.debtorCity}</Text>
+          <Text style={styles.cityInput}>{guarantor.city}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Tel:</Text>
-          <Text style={styles.input}>{data.debtorPhone}</Text>
+          <Text style={styles.input}>{guarantor.phone}</Text>
+        </View>
+        <View style={styles.guarantorSignature}>
+          <Text style={styles.guarantorSignatureText}>
+            Firma del Aval {index + 1}: ________________________
+          </Text>
         </View>
       </View>
+    ))}
+  </View>
+);
 
-      {data.numberOfGuarantors > 0 &&
-        data.guarantors &&
-        data.guarantors.length > 0 && (
-          <View style={styles.guarantorInfo}>
-            {data.guarantors.map((guarantor, index) => (
-              <View key={index}>
-                <Text style={styles.label}>Aval {index + 1}:</Text>
-                <View style={styles.row}>
-                  <Text style={styles.label}>Nombre:</Text>
-                  <Text style={styles.input}>{guarantor.name}</Text>
-                </View>
-                <View style={styles.combinedRow}>
-                  <Text style={styles.label}>Dirección:</Text>
-                  <Text style={styles.addressInput}>{guarantor.address}</Text>
-                  <Text style={styles.label}>Población:</Text>
-                  <Text style={styles.cityInput}>{guarantor.city}</Text>
-                </View>
-                <View style={styles.row}>
-                  <Text style={styles.label}>Tel:</Text>
-                  <Text style={styles.input}>{guarantor.phone}</Text>
-                </View>
-                <View style={styles.guarantorSignature}>
-                  <Text style={styles.guarantorSignatureText}>
-                    Firma del Aval {index + 1}: ________________________
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
+// Signature Component
+const Signature: React.FC<{ hasGuarantor: boolean }> = ({ hasGuarantor }) => (
+  <View style={styles.signature}>
+    <Text style={{ marginBottom: hasGuarantor ? 15 : 15 }}>
+      Firma del Deudor
+    </Text>
+  </View>
+);
 
-      <View style={styles.signature}>
-  <Text style={[ { marginBottom: 8 }]}>
-    Firma del Deudor
-  </Text>
-</View>
+// PromissoryNote Component
+const PromissoryNote: React.FC<{
+  data: PromissoryNoteData;
+  noteNumber: number;
+  hasGuarantor: boolean;
+}> = ({ data, noteNumber, hasGuarantor }) => {
+  const dueDate = calculateDueDate(data.firstPaymentDate, noteNumber, data.periodicity, data.paymentDay);
 
+  return (
+    <View style={hasGuarantor ? styles.pagareWithGuarantor : styles.pagareWithoutGuarantor}>
+      <Header noteNumber={noteNumber} totalNotes={data.numberOfMonths} amount={data.amount} />
+      <DateRow paymentPlace={data.payment_place} signingDate={data.signingDate} />
+      <Text style={[styles.label, { textAlign: "right" }]}>
+        Lugar y fecha de expedición
+      </Text>
+      <MainText name={data.name} amount={data.amount} />
+      <TwoLineContainer paymentPlace={data.payment_place} dueDate={dueDate} />
+      <SmallText 
+        periodicity={data.periodicity} 
+        numberOfMonths={data.numberOfMonths} 
+        interestRate={data.interestRate} 
+      />
+      <DebtorInfo 
+        debtorName={data.debtorName}
+        debtorAddress={data.debtorAddress}
+        debtorCity={data.debtorCity}
+        debtorPhone={data.debtorPhone}
+      />
+      {hasGuarantor && data.guarantors && data.guarantors.length > 0 && (
+        <GuarantorInfo guarantors={data.guarantors} />
+      )}
+      <Signature hasGuarantor={hasGuarantor} />
     </View>
   );
 };
 
-const PromissoryNotePDF: React.FC<PromissoryNotePDFProps> = ({ data }) => {
-  console.log("PromissoryNotePDF data:", data); // For debugging
+// PromissoryNotePDF Component
+const PromissoryNotePDF: React.FC<{ data: PromissoryNoteData }> = ({ data }) => {
+  console.log("PromissoryNotePDF data:", data); // Para depuración
 
-  // Agregar validación básica de datos
   if (!data || !data.numberOfMonths || data.numberOfMonths < 1) {
     console.error("Datos de pagaré inválidos", data);
     return (
@@ -385,7 +198,8 @@ const PromissoryNotePDF: React.FC<PromissoryNotePDFProps> = ({ data }) => {
     );
   }
 
-  const pagaresPerPage = 3;
+  const hasGuarantor = data.numberOfGuarantors > 0 && data.guarantors && data.guarantors.length > 0;
+  const pagaresPerPage = hasGuarantor ? 2 : 3;
   const totalPages = Math.ceil(data.numberOfMonths / pagaresPerPage);
 
   return (
@@ -395,13 +209,18 @@ const PromissoryNotePDF: React.FC<PromissoryNotePDFProps> = ({ data }) => {
           key={pageIndex}
           size="LETTER"
           orientation="portrait"
-          style={styles.page}
+          style={hasGuarantor ? styles.pageWithGuarantor : styles.pageWithoutGuarantor}
         >
           {Array.from({ length: pagaresPerPage }, (_, i) => {
             const noteNumber = pageIndex * pagaresPerPage + i + 1;
             if (noteNumber <= data.numberOfMonths) {
               return (
-                <PromissoryNote key={i} data={data} noteNumber={noteNumber} />
+                <PromissoryNote 
+                  key={i} 
+                  data={data} 
+                  noteNumber={noteNumber} 
+                  hasGuarantor={hasGuarantor}
+                />
               );
             }
             return null;
