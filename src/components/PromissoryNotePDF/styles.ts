@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
   pagareWithoutGuarantor: {
     border: "0.5 solid #1b5e20",
     borderRadius: 2,
-    padding: 7,
+    padding: 9,
     marginBottom: 15,
     backgroundColor: "#f5faf5",
     width: "100%",
@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
   pagareWithGuarantor: {
     border: "0.5 solid #1b5e20",
     borderRadius: 2,
-    padding: 5,
+    padding: 7,
     marginBottom: 15,
     backgroundColor: "#f5faf5",
     width: "100%",
@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     color: "black",
-    padding: 5,
+    padding: 7,
     marginBottom: 5,
     borderRadius: 4,
     border: "1 solid #1b5e20",
@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   input: {
     borderBottom: "0.5 solid #1b5e20",
@@ -88,24 +88,24 @@ export const styles = StyleSheet.create({
   smallText: {
     fontSize: 7,
     color: "#1b5e20",
-    marginBottom: 2,
+    marginBottom: 3,
   },
   debtorInfo: {
     border: "0.5 solid #1b5e20",
     padding: 2,
-    marginTop: 1,
+    marginTop: 2,
   },
   signature: {
     alignItems: "flex-end",
-    marginTop: 5,
-    marginBottom: 5,
+    marginTop: 6,
+    marginBottom: 6,
     fontSize: 7,
   },
   twoLineContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    marginBottom: 4,
+    marginBottom: 5,
   },
   lineContainer: {
     flex: 1,
@@ -113,28 +113,28 @@ export const styles = StyleSheet.create({
   lineText: {
     fontSize: 8,
     borderBottom: "0.5 solid #1b5e20",
-    paddingBottom: 1,
+    paddingBottom: 3,
   },
   lineLabel: {
     fontSize: 8,
     color: "#1b5e20",
-    marginTop: 2,
+    marginTop: 3,
   },
   guarantorInfo: {
     border: "0.5 solid #1b5e20",
     padding: 2,
-    marginTop: 4,
+    marginTop: 5,
   },
   guarantorTitle: {
     fontSize: 7,
     fontWeight: "bold",
     color: "#1b5e20",
-    marginBottom: 1,
+    marginBottom: 3,
   },
   inlineRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 1,
+    marginBottom: 3,
   },
   inlineLabel: {
     fontSize: 7,
@@ -147,19 +147,19 @@ export const styles = StyleSheet.create({
     fontSize: 8,
   },
   guarantorSignature: {
-    marginTop: 10,
-    paddingTop: 4,
+    marginTop: 12,
+    paddingTop: 5,
   },
   guarantorSignatureText: {
     fontSize: 8,
     color: "#1b5e20",
     textAlign: "center",
-    marginBottom: 2,
+    marginBottom: 3,
   },
   combinedRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 1,
+    marginBottom: 2,
   },
   addressInput: {
     borderBottom: "0.5 solid #1b5e20",
