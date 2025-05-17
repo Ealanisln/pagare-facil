@@ -1,3 +1,5 @@
+// src/components/Dashboard/index.tsx
+
 "use client";
 
 import React, { useRef, useState } from "react";
