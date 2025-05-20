@@ -11,7 +11,7 @@ import {
   Cta, 
   Faq, 
   Footer 
-} from "@/components/Landing";
+} from "@/components/landing";
 
 /**
  * LandingPage component para Pagaré Fácil SaaS
