@@ -12,11 +12,23 @@ export async function middleware(request: NextRequest) {
   // Si no hay sesión y la ruta está protegida, redirigir a login
   const isAuthRoute = request.nextUrl.pathname.startsWith("/auth");
   const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard");
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
   
-  if (!token && isDashboardRoute) {
+  // Si no hay token y la ruta es protegida, redirigir a login
+  if (!token && (isDashboardRoute || isAdminRoute)) {
     const redirectUrl = new URL("/auth/login", request.url);
     redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
+  }
+
+  // Para rutas de admin, verificar si el usuario es admin
+  if (isAdminRoute) {
+    // @ts-ignore - isAdmin podría no estar tipado en el token
+    const isAdmin = token?.isAdmin === true;
+    
+    if (!isAdmin) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
   }
 
   // Si hay sesión y el usuario intenta acceder a auth, redirigir a dashboard
@@ -32,5 +44,6 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/auth/:path*",
+    "/admin/:path*",
   ],
 }; 

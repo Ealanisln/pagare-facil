@@ -8,15 +8,16 @@ interface User {
   id: string;
   email: string | null | undefined;
   name: string | null | undefined;
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  error: string | null;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signOut: () => Promise<void>;
-  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     id: session.user.id,
     email: session.user.email,
     name: session.user.name,
+    isAdmin: session.user.isAdmin,
   } : null;
 
   // Función para iniciar sesión
@@ -48,7 +50,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(result.error);
       }
       
-      router.push('/dashboard');
+      if (user?.isAdmin) {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
       router.refresh();
     } catch (error) {
       console.error('Sign in error:', error);
@@ -85,29 +91,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Función para cerrar sesión
   const signOut = async () => {
-    setError(null);
-    
     try {
-      await nextAuthSignOut({ redirect: false });
-      router.push('/');
-      router.refresh();
+      await nextAuthSignOut({ callbackUrl: '/auth/login' });
     } catch (error) {
       console.error('Sign out error:', error);
-      setError(error instanceof Error ? error.message : 'An error occurred during sign out');
     }
   };
 
-  const value = {
-    user,
-    loading: status === "loading",
-    signIn,
-    signUp,
-    signOut,
-    error,
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading: status === "loading",
+        error,
+        signIn,
+        signUp,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

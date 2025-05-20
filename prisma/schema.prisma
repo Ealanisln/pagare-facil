@@ -58,6 +58,7 @@ model User {
   emailVerified DateTime?  @map("email_verified")
   image         String?
   password      String?    // Storing hashed password for credentials provider
+  isAdmin       Boolean    @default(false) @map("is_admin")
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
   

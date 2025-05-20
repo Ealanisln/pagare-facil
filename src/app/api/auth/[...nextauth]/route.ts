@@ -12,6 +12,7 @@ declare module "next-auth" {
       id: string;
       name?: string | null;
       email?: string | null;
+      isAdmin?: boolean;
     };
   }
 }
@@ -20,6 +21,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
+    isAdmin?: boolean;
   }
 }
 
@@ -46,14 +48,11 @@ const handler = NextAuth({
           return null;
         }
 
-        // Type assertion to add password to User type
-        type UserWithPassword = User & { password?: string | null };
-
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email,
           }
-        }) as UserWithPassword;
+        });
 
         if (!user || !user.password) {
           return null;
@@ -72,6 +71,7 @@ const handler = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
+          isAdmin: user.isAdmin,
         };
       },
     }),
@@ -80,11 +80,14 @@ const handler = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        // @ts-ignore - isAdmin needs to be passed from the user
+        token.isAdmin = user.isAdmin;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.id;
+      session.user.isAdmin = token.isAdmin;
       return session;
     },
   },
