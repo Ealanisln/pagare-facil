@@ -3,14 +3,15 @@
 "use client";
 
 import React, { type JSX } from "react";
-// Import components individually
-import { Header } from "@/components/Landing/Header";
-import { Hero } from "@/components/Landing/Hero";
-import { Features } from "@/components/Landing/Features";
-import { HowItWorks } from "@/components/Landing/HowItWorks";
-import { Cta } from "@/components/Landing/Cta";
-import { Faq } from "@/components/Landing/Faq";
-import { Footer } from "@/components/Landing/Footer";
+import { 
+  Header, 
+  Hero, 
+  Features, 
+  HowItWorks, 
+  Cta, 
+  Faq, 
+  Footer 
+} from "@/components/Landing";
 
 /**
  * LandingPage component para Pagaré Fácil SaaS
