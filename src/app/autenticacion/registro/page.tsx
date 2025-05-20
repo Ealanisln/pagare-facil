@@ -33,7 +33,7 @@ function RegisterForm() {
   useEffect(() => {
     // Si el usuario ya está autenticado, redirigir al dashboard
     if (user) {
-      router.push("/dashboard");
+      router.push("/panel");
     }
   }, [user, router]);
 
@@ -136,7 +136,7 @@ function RegisterForm() {
             >
               Acepto los{" "}
               <Link 
-                href="/terms" 
+                href="/terminos" 
                 className="text-indigo-600 hover:underline"
                 target="_blank"
               >
@@ -157,7 +157,7 @@ function RegisterForm() {
           </Button>
           <div className="text-center text-sm">
             ¿Ya tienes una cuenta?{" "}
-            <Link href="/auth/login" className="text-indigo-600 hover:underline">
+            <Link href="/autenticacion/iniciar-sesion" className="text-indigo-600 hover:underline">
               Iniciar sesión
             </Link>
           </div>

@@ -13,15 +13,19 @@ import {
 } from "./utils";
 
 // Header Component
-const Header: React.FC<{ noteNumber: number; totalNotes: number; amount: number }> = ({ noteNumber, totalNotes, amount }) => (
+const Header: React.FC<{ noteNumber: number; totalNotes: number; amount: number }> = ({ 
+  noteNumber, 
+  totalNotes, 
+  amount 
+}) => (
   <View style={styles.header}>
-    <Text style={styles.headerText}>PAGARÉ</Text>
+    <Text style={styles.documentTitle}>PAGARÉ</Text>
     <View style={styles.headerRight}>
-      <Text style={styles.headerRightItem}>
+      <Text style={styles.documentNumber}>
         No. {noteNumber} de {totalNotes}
       </Text>
       <View style={styles.verticalLine} />
-      <Text style={styles.headerRightItem}>
+      <Text style={[styles.headerRightItem, styles.noteAmountHighlight]}>
         BUENO POR $ {amount.toFixed(2)}
       </Text>
     </View>
@@ -88,20 +92,20 @@ const DebtorInfo: React.FC<{
   debtorPhone?: string 
 }> = ({ debtorName, debtorAddress, debtorCity, debtorPhone }) => (
   <View style={styles.debtorInfo}>
-    <Text style={[styles.label, { marginBottom: 2 }]}>Nombre y datos del deudor:</Text>
+    <Text style={[styles.label, { marginBottom: 3, fontWeight: "bold" }]}>Nombre y datos del deudor:</Text>
     <View style={styles.row}>
       <Text style={styles.label}>Nombre: </Text>
       <Text style={styles.input}>{debtorName}</Text>
     </View>
     <View style={styles.combinedRow}>
-    <Text style={[styles.label, { marginBottom: 2 }]}>Dirección: </Text>
+      <Text style={styles.label}>Dirección: </Text>
       <Text style={styles.addressInput}>{debtorAddress}</Text>
-      <Text style={styles.label}>Población:  </Text>
+      <Text style={styles.label}>Población: </Text>
       <Text style={styles.cityInput}>{debtorCity}</Text>
     </View>
     <View style={styles.row}>
-    <Text style={[styles.label, { marginBottom: 3 }]}>Teléfono: </Text>
-      <Text style={styles.input}>{debtorPhone}</Text>
+      <Text style={styles.label}>Teléfono: </Text>
+      <Text style={styles.input}>{debtorPhone || "---"}</Text>
     </View>
   </View>
 );
@@ -111,24 +115,25 @@ const GuarantorInfo: React.FC<{ guarantors: Guarantor[] }> = ({ guarantors }) =>
   <View style={styles.guarantorInfo}>
     {guarantors.map((guarantor, index) => (
       <View key={index}>
-        <Text style={[styles.label, { marginBottom: 2 }]}>Aval {index + 1}:</Text>
+        <Text style={[styles.label, { marginBottom: 4, fontWeight: "bold" }]}>Aval {index + 1}:</Text>
         <View style={styles.row}>
-          <Text style={[styles.label, { marginBottom: 2 }]}>Nombre: </Text>
+          <Text style={styles.label}>Nombre: </Text>
           <Text style={styles.input}>{guarantor.name}</Text>
         </View>
         <View style={styles.combinedRow}>
-          <Text style={[styles.label, { marginBottom: 2 }]}>Dirección: </Text>
+          <Text style={styles.label}>Dirección: </Text>
           <Text style={styles.addressInput}>{guarantor.address}</Text>
-          <Text style={styles.label}>Población:  </Text>
+          <Text style={styles.label}>Población: </Text>
           <Text style={styles.cityInput}>{guarantor.city}</Text>
         </View>
         <View style={styles.row}>
-          <Text style={[styles.label, { marginBottom: 3 }]}>Tel: </Text>
-          <Text style={styles.input}>{guarantor.phone}</Text>
+          <Text style={styles.label}>Tel: </Text>
+          <Text style={styles.input}>{guarantor.phone || "---"}</Text>
         </View>
         <View style={styles.guarantorSignature}>
-          <Text style={styles.guarantorSignatureText}>
-            Firma del Aval {index + 1}: ________________________
+          <View style={styles.signatureLine} />
+          <Text style={styles.signatureText}>
+            Firma del Aval {index + 1}
           </Text>
         </View>
       </View>
@@ -139,8 +144,16 @@ const GuarantorInfo: React.FC<{ guarantors: Guarantor[] }> = ({ guarantors }) =>
 // Signature Component
 const Signature: React.FC<{ hasGuarantor: boolean }> = ({ hasGuarantor }) => (
   <View style={styles.signature}>
-    <Text style={{ marginBottom: hasGuarantor ? 15 : 15 }}>
-      Firma del Deudor
+    <View style={styles.signatureLine} />
+    <Text style={styles.signatureText}>Firma del Deudor</Text>
+  </View>
+);
+
+// Footer Component
+const Footer: React.FC<{ noteNumber: number; totalNotes: number }> = ({ noteNumber, totalNotes }) => (
+  <View>
+    <Text style={styles.footerNote}>
+      Documento {noteNumber} de {totalNotes} - Generado el {formatDate(new Date())}
     </Text>
   </View>
 );
@@ -177,6 +190,7 @@ const PromissoryNote: React.FC<{
         <GuarantorInfo guarantors={data.guarantors} />
       )}
       <Signature hasGuarantor={hasGuarantor} />
+      <Footer noteNumber={noteNumber} totalNotes={data.numberOfMonths} />
     </View>
   );
 };
@@ -198,8 +212,9 @@ const PromissoryNotePDF: React.FC<{ data: PromissoryNoteData }> = ({ data }) => 
     );
   }
 
+  // Siempre mostrar 3 pagarés por página independientemente de si hay avalistas
+  const pagaresPerPage = 3;
   const hasGuarantor = data.numberOfGuarantors > 0 && data.guarantors && data.guarantors.length > 0;
-  const pagaresPerPage = hasGuarantor ? 2 : 3;
   const totalPages = Math.ceil(data.numberOfMonths / pagaresPerPage);
 
   return (
@@ -209,7 +224,7 @@ const PromissoryNotePDF: React.FC<{ data: PromissoryNoteData }> = ({ data }) => 
           key={pageIndex}
           size="LETTER"
           orientation="portrait"
-          style={hasGuarantor ? styles.pageWithGuarantor : styles.pageWithoutGuarantor}
+          style={styles.pageWithoutGuarantor}
         >
           {Array.from({ length: pagaresPerPage }, (_, i) => {
             const noteNumber = pageIndex * pagaresPerPage + i + 1;

@@ -17,11 +17,11 @@ export default function PricingPage() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <Link href="/auth/login" className="text-indigo-700 hover:text-indigo-500">
+              <Link href="/autenticacion/iniciar-sesion" className="text-indigo-700 hover:text-indigo-500">
                 Iniciar sesión
               </Link>
               <Button asChild>
-                <Link href="/auth/register">Registrarse</Link>
+                <Link href="/autenticacion/registro">Registrarse</Link>
               </Button>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function PricingPage() {
             Nuestro equipo está disponible para ayudarte a elegir el plan adecuado para ti.
           </p>
           <Button variant="outline" asChild>
-            <Link href="/contact">Contactar con ventas</Link>
+            <Link href="/contacto">Contactar con ventas</Link>
           </Button>
         </div>
       </main>

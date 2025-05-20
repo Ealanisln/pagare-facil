@@ -56,7 +56,7 @@ export const DEFAULT_PRICING_PLANS: PricingPlanData[] = [
       { name: "API de integración", included: false },
     ],
     buttonText: "Comenzar gratis",
-    buttonHref: "/auth/register",
+    buttonHref: "/autenticacion/registro",
   },
   {
     id: "pro",
@@ -73,7 +73,7 @@ export const DEFAULT_PRICING_PLANS: PricingPlanData[] = [
       { name: "API de integración", included: false },
     ],
     buttonText: "Comenzar prueba de 14 días",
-    buttonHref: "/auth/register",
+    buttonHref: "/autenticacion/registro",
     mostPopular: true,
   },
   {
@@ -91,7 +91,7 @@ export const DEFAULT_PRICING_PLANS: PricingPlanData[] = [
       { name: "API de integración", included: true },
     ],
     buttonText: "Contactar ventas",
-    buttonHref: "/contact",
+    buttonHref: "/contacto",
     variant: "outline",
   },
 ];

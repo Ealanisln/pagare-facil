@@ -32,9 +32,9 @@ const handler = NextAuth({
     maxAge: 60 * 60 * 24 * 7, // 1 week
   },
   pages: {
-    signIn: "/auth/login",
-    signOut: "/auth/logout",
-    error: "/auth/login",
+    signIn: "/autenticacion/iniciar-sesion",
+    signOut: "/autenticacion/cerrar-sesion",
+    error: "/autenticacion/iniciar-sesion",
   },
   providers: [
     CredentialsProvider({

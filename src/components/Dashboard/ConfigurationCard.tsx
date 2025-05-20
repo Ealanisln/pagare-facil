@@ -40,33 +40,39 @@ export function ConfigurationCard({
   setNumberOfMonths,
 }: ConfigurationCardProps) {
   return (
-    <Card className="col-span-full lg:col-span-1">
-      <CardHeader>
-        <CardTitle>Configuración de pagarés</CardTitle>
+    <Card className="border-none shadow-md">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-medium">Configuración de pagarés</CardTitle>
         <CardDescription>
           Configura la periodicidad y número de pagarés a generar.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-6">
-          <div className="grid gap-3">
-            <Label htmlFor="signing_date">Fecha del pagaré</Label>
-            <FullDatePicker
-              selected={signingDate}
-              onChange={(date) => setSigningDate(date)}
-            />
+        <div className="grid gap-5">
+          <div className="space-y-2.5">
+            <Label htmlFor="signing_date" className="text-sm font-medium">Fecha del pagaré</Label>
+            <div className="w-full">
+              <FullDatePicker
+                selected={signingDate}
+                onChange={(date) => setSigningDate(date)}
+                className="w-full"
+              />
+            </div>
           </div>
-          <div className="grid gap-3">
-            <Label htmlFor="payment_day">Día de pago</Label>
-            <DatePicker
-              selected={paymentDay}
-              onChange={(day) => setPaymentDay(day)}
-            />
+          <div className="space-y-2.5">
+            <Label htmlFor="payment_day" className="text-sm font-medium">Día de pago</Label>
+            <div className="w-full">
+              <DatePicker
+                selected={paymentDay}
+                onChange={(day) => setPaymentDay(day)}
+                className="w-full"
+              />
+            </div>
           </div>
-          <div className="grid gap-3">
-            <Label htmlFor="periodicity">Periodicidad</Label>
+          <div className="space-y-2.5">
+            <Label htmlFor="periodicity" className="text-sm font-medium">Periodicidad</Label>
             <Select onValueChange={setPeriodicity} value={periodicity}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Selecciona la periodicidad" />
               </SelectTrigger>
               <SelectContent>
@@ -78,14 +84,15 @@ export function ConfigurationCard({
               </SelectContent>
             </Select>
           </div>
-          <div className="grid gap-3">
-            <Label htmlFor="number_of_months">Número de períodos</Label>
+          <div className="space-y-2.5">
+            <Label htmlFor="number_of_months" className="text-sm font-medium">Número de períodos</Label>
             <Input
               id="number_of_months"
               type="number"
               value={numberOfMonths}
               onChange={(e) => setNumberOfMonths(parseInt(e.target.value))}
               min="1"
+              className="w-full"
             />
           </div>
         </div>

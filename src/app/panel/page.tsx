@@ -8,9 +8,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Panel</h1>
         <Button asChild>
-          <Link href="/dashboard/promissory-notes/new">
+          <Link href="/panel/pagares/nuevo">
             <Plus className="mr-2 h-4 w-4" /> Crear Pagaré
           </Link>
         </Button>
@@ -51,7 +51,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">Free</div>
             <p className="text-xs text-muted-foreground">
-              <Link href="/pricing" className="text-indigo-600 hover:underline">
+              <Link href="/precios" className="text-indigo-600 hover:underline">
                 Actualizar plan
               </Link>
             </p>

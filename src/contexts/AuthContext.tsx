@@ -51,9 +51,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       if (user?.isAdmin) {
-        router.push('/admin');
+        router.push('/administrador');
       } else {
-        router.push('/dashboard');
+        router.push('/panel');
       }
       router.refresh();
     } catch (error) {
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Función para cerrar sesión
   const signOut = async () => {
     try {
-      await nextAuthSignOut({ callbackUrl: '/auth/login' });
+      await nextAuthSignOut({ callbackUrl: '/autenticacion/iniciar-sesion' });
     } catch (error) {
       console.error('Sign out error:', error);
     }

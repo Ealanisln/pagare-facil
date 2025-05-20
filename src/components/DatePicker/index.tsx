@@ -3,6 +3,7 @@
 import * as React from "react"
 import { CalendarIcon } from "@radix-ui/react-icons"
 import { format, setDate } from "date-fns"
+import { es } from "date-fns/locale"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -12,20 +13,18 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { useState } from "react"
 
 interface DatePickerProps {
   selected: number | undefined;
   onChange: (day: number | undefined) => void;
+  className?: string;
 }
 
-export function DatePicker({ selected, onChange }: DatePickerProps) {
+export function DatePicker({ selected, onChange, className }: DatePickerProps) {
   const today = new Date()
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     selected ? setDate(today, selected) : undefined
   )
-  const [signingDate, setSigningDate] = useState<Date | undefined>(undefined);
-
 
   const handleSelect = (date: Date | undefined) => {
     setSelectedDate(date)
@@ -38,8 +37,9 @@ export function DatePicker({ selected, onChange }: DatePickerProps) {
         <Button
           variant={"outline"}
           className={cn(
-            "w-[240px] justify-start text-left font-normal",
-            !selected && "text-muted-foreground"
+            "w-full justify-start text-left font-normal",
+            !selected && "text-muted-foreground",
+            className
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
@@ -52,8 +52,22 @@ export function DatePicker({ selected, onChange }: DatePickerProps) {
           selected={selectedDate}
           onSelect={handleSelect}
           initialFocus
+          locale={es}
           fromDate={new Date(today.getFullYear(), today.getMonth(), 1)}
           toDate={new Date(today.getFullYear(), today.getMonth() + 1, 0)}
+          classNames={{
+            caption_label: "font-medium text-sm",
+            table: "w-full border-collapse space-y-1",
+            head_row: "flex",
+            head_cell: "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+            row: "flex w-full mt-2",
+            cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+            day: cn(
+              "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+            ),
+            day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
+            day_today: "bg-accent text-accent-foreground",
+          }}
         />
       </PopoverContent>
     </Popover>

@@ -25,7 +25,7 @@ export const Header = () => {
         <NavLink href="#preguntas">Preguntas</NavLink>
       </nav>
       <Button variant="outline" className="hidden md:flex border-indigo-600 text-indigo-600 hover:bg-indigo-50" asChild>
-        <Link href="/">Iniciar Sesión</Link>
+        <Link href="/autenticacion/iniciar-sesion">Iniciar Sesión</Link>
       </Button>
     </motion.header>
   );

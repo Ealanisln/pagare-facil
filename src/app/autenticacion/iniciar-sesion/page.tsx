@@ -29,7 +29,7 @@ function LoginForm() {
   useEffect(() => {
     // Si el usuario ya está autenticado, redirigir al dashboard o a la ruta de redirección
     if (user) {
-      router.push(redirect || "/dashboard");
+      router.push(redirect || "/panel");
     }
   }, [user, router, redirect]);
 
@@ -72,7 +72,7 @@ function LoginForm() {
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Contraseña</Label>
               <Link
-                href="/auth/reset-password"
+                href="/autenticacion/restablecer-contrasena"
                 className="text-xs text-indigo-600 hover:underline"
               >
                 ¿Olvidaste tu contraseña?
@@ -100,7 +100,7 @@ function LoginForm() {
           </Button>
           <div className="text-center text-sm">
             ¿No tienes una cuenta?{" "}
-            <Link href="/auth/register" className="text-indigo-600 hover:underline">
+            <Link href="/autenticacion/registro" className="text-indigo-600 hover:underline">
               Regístrate
             </Link>
           </div>

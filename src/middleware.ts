@@ -10,13 +10,13 @@ export async function middleware(request: NextRequest) {
   });
 
   // Si no hay sesión y la ruta está protegida, redirigir a login
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/auth");
-  const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard");
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+  const isAuthRoute = request.nextUrl.pathname.startsWith("/autenticacion");
+  const isDashboardRoute = request.nextUrl.pathname.startsWith("/panel");
+  const isAdminRoute = request.nextUrl.pathname.startsWith("/administrador");
   
   // Si no hay token y la ruta es protegida, redirigir a login
   if (!token && (isDashboardRoute || isAdminRoute)) {
-    const redirectUrl = new URL("/auth/login", request.url);
+    const redirectUrl = new URL("/autenticacion/iniciar-sesion", request.url);
     redirectUrl.searchParams.set("redirect", request.nextUrl.pathname);
     return NextResponse.redirect(redirectUrl);
   }
@@ -27,13 +27,13 @@ export async function middleware(request: NextRequest) {
     const isAdmin = token?.isAdmin === true;
     
     if (!isAdmin) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/panel", request.url));
     }
   }
 
   // Si hay sesión y el usuario intenta acceder a auth, redirigir a dashboard
   if (token && isAuthRoute) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    return NextResponse.redirect(new URL("/panel", request.url));
   }
 
   return NextResponse.next();
@@ -42,8 +42,8 @@ export async function middleware(request: NextRequest) {
 // Especificar las rutas donde se aplicará el middleware
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/auth/:path*",
-    "/admin/:path*",
+    "/panel/:path*",
+    "/autenticacion/:path*",
+    "/administrador/:path*",
   ],
 }; 

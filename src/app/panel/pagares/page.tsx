@@ -28,7 +28,7 @@ export default function PromissoryNotesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Mis Pagarés</h1>
         <Button asChild>
-          <Link href="/dashboard/promissory-notes/new">
+          <Link href="/panel/pagares/nuevo">
             <Plus className="mr-2 h-4 w-4" /> Crear Pagaré
           </Link>
         </Button>
@@ -89,7 +89,7 @@ export default function PromissoryNotesPage() {
                 a gestionar tus documentos legales.
               </p>
               <Button asChild>
-                <Link href="/dashboard/promissory-notes/new">
+                <Link href="/panel/pagares/nuevo">
                   <Plus className="mr-2 h-4 w-4" /> Crear mi primer pagaré
                 </Link>
               </Button>

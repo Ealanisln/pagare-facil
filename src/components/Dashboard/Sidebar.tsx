@@ -54,28 +54,28 @@ export function Sidebar() {
       
       <nav className="flex-1 p-4 space-y-1">
         <NavItem
-          href="/dashboard"
+          href="/panel"
           icon={<Home className="h-4 w-4" />}
-          label="Dashboard"
-          isActive={pathname === "/dashboard"}
+          label="Panel"
+          isActive={pathname === "/panel"}
         />
         <NavItem
-          href="/dashboard/promissory-notes"
+          href="/panel/pagares"
           icon={<Files className="h-4 w-4" />}
           label="Mis pagarés"
-          isActive={pathname.startsWith("/dashboard/promissory-notes")}
+          isActive={pathname.startsWith("/panel/pagares")}
         />
         <NavItem
-          href="/dashboard/clients"
+          href="/panel/clientes"
           icon={<Users className="h-4 w-4" />}
           label="Clientes"
-          isActive={pathname.startsWith("/dashboard/clients")}
+          isActive={pathname.startsWith("/panel/clientes")}
         />
         <NavItem
-          href="/dashboard/templates"
+          href="/panel/plantillas"
           icon={<Package2 className="h-4 w-4" />}
           label="Plantillas"
-          isActive={pathname.startsWith("/dashboard/templates")}
+          isActive={pathname.startsWith("/panel/plantillas")}
         />
         
         <div className="pt-4 mt-4 border-t border-gray-200">
@@ -83,22 +83,22 @@ export function Sidebar() {
             Cuenta
           </h3>
           <NavItem
-            href="/dashboard/settings"
+            href="/panel/configuracion"
             icon={<Settings className="h-4 w-4" />}
             label="Configuración"
-            isActive={pathname.startsWith("/dashboard/settings")}
+            isActive={pathname.startsWith("/panel/configuracion")}
           />
           <NavItem
-            href="/dashboard/billing"
+            href="/panel/facturacion"
             icon={<CreditCard className="h-4 w-4" />}
             label="Facturación"
-            isActive={pathname.startsWith("/dashboard/billing")}
+            isActive={pathname.startsWith("/panel/facturacion")}
           />
           <NavItem
-            href="/dashboard/help"
+            href="/panel/ayuda"
             icon={<HelpCircle className="h-4 w-4" />}
             label="Ayuda"
-            isActive={pathname.startsWith("/dashboard/help")}
+            isActive={pathname.startsWith("/panel/ayuda")}
           />
         </div>
       </nav>
@@ -110,7 +110,7 @@ export function Sidebar() {
             <p className="text-xs text-muted-foreground">Free Trial</p>
           </div>
           <Link 
-            href="/pricing"
+            href="/precios"
             className="text-xs font-medium text-indigo-600 hover:text-indigo-800"
           >
             Actualizar
