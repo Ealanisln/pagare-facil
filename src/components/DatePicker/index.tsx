@@ -25,14 +25,25 @@ export function DatePicker({ selected, onChange, className }: DatePickerProps) {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
     selected ? setDate(today, selected) : undefined
   )
+  const [open, setOpen] = React.useState(false)
 
-  const handleSelect = (date: Date | undefined) => {
-    setSelectedDate(date)
-    onChange(date ? date.getDate() : undefined)
+  const handleSelect = (date: Date | Date[] | undefined) => {
+    if (Array.isArray(date)) {
+      // If it's an array, take the first date
+      const firstDate = date[0]
+      setSelectedDate(firstDate)
+      onChange(firstDate ? firstDate.getDate() : undefined)
+    } else {
+      // Single date or undefined
+      setSelectedDate(date)
+      onChange(date ? date.getDate() : undefined)
+    }
+    // Close the popover after selection
+    setOpen(false)
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
@@ -52,7 +63,7 @@ export function DatePicker({ selected, onChange, className }: DatePickerProps) {
           selected={selectedDate}
           onSelect={handleSelect}
           initialFocus
-          locale={es}
+          locale="es-ES"
           fromDate={new Date(today.getFullYear(), today.getMonth(), 1)}
           toDate={new Date(today.getFullYear(), today.getMonth() + 1, 0)}
           classNames={{

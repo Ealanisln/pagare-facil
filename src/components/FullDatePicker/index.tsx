@@ -21,8 +21,22 @@ interface FullDatePickerProps {
 }
 
 export function FullDatePicker({ selected, onChange, className }: FullDatePickerProps) {
+  const [open, setOpen] = React.useState(false)
+
+  const handleSelect = (date: Date | Date[] | undefined) => {
+    if (Array.isArray(date)) {
+      // If it's an array, take the first date
+      onChange(date[0])
+    } else {
+      // Single date or undefined
+      onChange(date)
+    }
+    // Close the popover after selection
+    setOpen(false)
+  }
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
@@ -40,9 +54,9 @@ export function FullDatePicker({ selected, onChange, className }: FullDatePicker
         <Calendar
           mode="single"
           selected={selected}
-          onSelect={onChange}
+          onSelect={handleSelect}
           initialFocus
-          locale={es}
+          locale="es-ES"
           classNames={{
             caption_label: "font-medium text-sm",
             table: "w-full border-collapse space-y-1",

@@ -1,77 +1,115 @@
 "use client"
 
 import * as React from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
-import { es } from "date-fns/locale"
-
+import Calendar from 'react-calendar'
+import 'react-calendar/dist/Calendar.css'  // RESTORED - using default styles as base
+import './calendar.css'
 import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
 
-export type CalendarProps = React.ComponentProps<typeof DayPicker>
+export interface CalendarProps {
+  className?: string
+  mode?: 'single' | 'range'
+  selected?: Date | Date[]
+  onSelect?: (date: Date | Date[] | undefined) => void
+  locale?: string
+  fromDate?: Date
+  toDate?: Date
+  initialFocus?: boolean
+  showOutsideDays?: boolean
+  classNames?: Record<string, string>
+}
 
-function Calendar({
+function ReactCalendarComponent({
   className,
-  classNames,
-  showOutsideDays = true,
-  locale = es,
+  mode = 'single',
+  selected,
+  onSelect,
+  locale = 'es-ES',
+  fromDate,
+  toDate,
   ...props
 }: CalendarProps) {
+  // Convert selected prop to react-calendar value
+  const calendarValue = React.useMemo(() => {
+    if (selected) {
+      if (Array.isArray(selected)) {
+        // For range mode, ensure we have exactly 2 dates
+        if (mode === 'range' && selected.length === 2) {
+          return selected as [Date, Date]
+        } else if (selected.length > 0) {
+          return selected[0]
+        }
+        return null
+      }
+      return selected
+    }
+    return null
+  }, [selected, mode])
+
+  // Force style override for month text - simplified
+  React.useEffect(() => {
+    const applyMonthTextSize = () => {
+      const monthLabels = document.querySelectorAll('.react-calendar__navigation__label')
+      monthLabels.forEach((label) => {
+        const element = label as HTMLElement
+        element.style.setProperty('font-size', '14px', 'important')
+      })
+    }
+    
+    // Apply immediately and with a small delay to ensure it takes effect
+    applyMonthTextSize()
+    const timeout = setTimeout(applyMonthTextSize, 50)
+    
+    return () => clearTimeout(timeout)
+  }, [])
+
+  // Handle calendar change events
+  const handleChange = React.useCallback((value: any) => {
+    if (onSelect) {
+      if (value === null || value === undefined) {
+        onSelect(undefined)
+      } else if (Array.isArray(value)) {
+        // Filter out null values and ensure we have Date objects
+        const dateArray = value.filter((date: any): date is Date => date instanceof Date)
+        onSelect(dateArray.length > 0 ? dateArray : undefined)
+      } else if (value instanceof Date) {
+        onSelect(value)
+      } else {
+        onSelect(undefined)
+      }
+    }
+  }, [onSelect])
+
+  // Custom month/year formatter to remove "De"
+  const formatMonthYear = React.useCallback((locale: string | undefined, date: Date) => {
+    const monthNames = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'
+    ]
+    const month = monthNames[date.getMonth()]
+    const year = date.getFullYear()
+    return `${month} ${year}`
+  }, [])
+
   return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn("p-3", className)}
-      locale={locale}
-      classNames={{
-        months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-        month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center gap-1",
-        caption_label: "text-sm font-medium",
-        nav: "space-x-1 flex items-center",
-        nav_button: cn(
-          buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100"
-        ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
-        table: "w-full border-collapse space-y-1",
-        head_row: "flex",
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
-        day: cn(
-          buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
-        ),
-        day_range_end: "day-range-end",
-        day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground",
-        day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        day_disabled: "text-muted-foreground opacity-50",
-        day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
-        day_hidden: "invisible",
-        ...classNames,
-      }}
-      components={{
-        PreviousMonthButton: (props) => (
-          <button {...props}>
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-        ),
-        NextMonthButton: (props) => (
-          <button {...props}>
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        )
-      }}
-      {...props}
-    />
+    <div className={cn("react-calendar-wrapper custom-react-calendar", className)}>
+      <Calendar
+        onChange={handleChange}
+        value={calendarValue as any}
+        locale={locale}
+        className="mx-auto border rounded-lg shadow-sm"
+        tileClassName="hover:bg-blue-50"
+        selectRange={mode === 'range'}
+        minDate={fromDate}
+        maxDate={toDate}
+        formatMonthYear={formatMonthYear}
+        calendarType="gregory"
+        {...props}
+      />
+    </div>
   )
 }
-Calendar.displayName = "Calendar"
 
-export { Calendar }
+ReactCalendarComponent.displayName = "Calendar"
+
+export { ReactCalendarComponent as Calendar }
