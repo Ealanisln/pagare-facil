@@ -4,15 +4,15 @@ import React from "react";
 import { Page, Text, View, Document } from "@react-pdf/renderer";
 import { formatearCantidad } from "@/lib/number-to-letter";
 import { styles } from "./styles";
-import { 
-  PromissoryNoteData, 
-  Guarantor, 
-  formatDate, 
-  calculateDueDate, 
-  getPeriodicityText 
+import {
+  PromissoryNoteData,
+  Guarantor,
+  formatDate,
+  calculateDueDate,
+  getPeriodicityText
 } from "./utils";
 
-// Header Component
+// Header Component - Corporate style with solid background
 const Header: React.FC<{ noteNumber: number; totalNotes: number; amount: number }> = ({ noteNumber, totalNotes, amount }) => (
   <View style={styles.header}>
     <Text style={styles.headerText}>PAGARÉ</Text>
@@ -22,7 +22,7 @@ const Header: React.FC<{ noteNumber: number; totalNotes: number; amount: number 
       </Text>
       <View style={styles.verticalLine} />
       <Text style={styles.headerRightItem}>
-        BUENO POR $ {amount.toFixed(2)}
+        BUENO POR ${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </Text>
     </View>
   </View>
@@ -37,38 +37,37 @@ const DateRow: React.FC<{ paymentPlace: string; signingDate: Date }> = ({ paymen
   </View>
 );
 
-// Main Text Component
+// Main Text Component - The promise to pay
 const MainText: React.FC<{ name: string; amount: number }> = ({ name, amount }) => (
   <Text style={styles.mainText}>
     Debo(mos) y pagaré(mos) incondicionalmente por este Pagaré a la orden de{" "}
-    {name}, la cantidad de {formatearCantidad(amount)}.
+    <Text style={{ fontWeight: "bold" }}>{name}</Text>, la cantidad de{" "}
+    <Text style={{ fontWeight: "bold" }}>{formatearCantidad(amount)}</Text>.
   </Text>
 );
 
-// Two Line Container Component
-const TwoLineContainer: React.FC<{ paymentPlace: string; dueDate: Date }> = ({ paymentPlace, dueDate }) => (
+// Payment Details Component - Two column layout
+const PaymentDetails: React.FC<{ paymentPlace: string; dueDate: Date }> = ({ paymentPlace, dueDate }) => (
   <View style={styles.twoLineContainer}>
     <View style={styles.lineContainer}>
       <Text style={styles.lineText}>{paymentPlace}</Text>
-      <Text style={styles.lineLabel}>Lugar de pago</Text>
+      <Text style={styles.lineLabel}>LUGAR DE PAGO</Text>
     </View>
     <View style={styles.lineContainer}>
-      <Text style={styles.lineText}>
-        {formatDate(dueDate)}
-      </Text>
-      <Text style={styles.lineLabel}>Fecha de Pago</Text>
+      <Text style={styles.lineText}>{formatDate(dueDate)}</Text>
+      <Text style={styles.lineLabel}>FECHA DE VENCIMIENTO</Text>
     </View>
   </View>
 );
 
-// Small Text Component
-const SmallText: React.FC<{ 
-  periodicity: string; 
-  numberOfMonths: number; 
-  interestRate: number 
+// Terms and Conditions Component
+const TermsText: React.FC<{
+  periodicity: string;
+  numberOfMonths: number;
+  interestRate: number
 }> = ({ periodicity, numberOfMonths, interestRate }) => (
   <Text style={styles.smallText}>
-    Este pagaré es parte de una serie de pagos {getPeriodicityText(periodicity)}es. 
+    Este pagaré es parte de una serie de pagos {getPeriodicityText(periodicity)}es.
     Valor recibido a mi (nuestra) entera satisfacción. Este pagaré forma
     parte de una serie numerada del 1 al {numberOfMonths} y todos están
     sujetos a la condición de que, al no pagarse cualquiera de ellos a su
@@ -80,72 +79,85 @@ const SmallText: React.FC<{
   </Text>
 );
 
-// Debtor Info Component
-const DebtorInfo: React.FC<{ 
-  debtorName: string; 
-  debtorAddress: string; 
-  debtorCity: string; 
-  debtorPhone?: string 
+// Debtor Info Component - Card style with accent border
+const DebtorInfo: React.FC<{
+  debtorName: string;
+  debtorAddress: string;
+  debtorCity: string;
+  debtorPhone?: string
 }> = ({ debtorName, debtorAddress, debtorCity, debtorPhone }) => (
   <View style={styles.debtorInfo}>
-    <Text style={[styles.label, { marginBottom: 2 }]}>Nombre y datos del deudor:</Text>
+    <Text style={[styles.label, { marginBottom: 6, fontSize: 9 }]}>DATOS DEL DEUDOR</Text>
     <View style={styles.row}>
-      <Text style={styles.label}>Nombre: </Text>
+      <Text style={styles.label}>Nombre:</Text>
       <Text style={styles.input}>{debtorName}</Text>
     </View>
     <View style={styles.combinedRow}>
-    <Text style={[styles.label, { marginBottom: 2 }]}>Dirección: </Text>
+      <Text style={styles.label}>Dirección:</Text>
       <Text style={styles.addressInput}>{debtorAddress}</Text>
-      <Text style={styles.label}>Población:  </Text>
+      <Text style={styles.label}>Población:</Text>
       <Text style={styles.cityInput}>{debtorCity}</Text>
     </View>
-    <View style={styles.row}>
-    <Text style={[styles.label, { marginBottom: 3 }]}>Teléfono: </Text>
-      <Text style={styles.input}>{debtorPhone}</Text>
-    </View>
+    {debtorPhone && (
+      <View style={styles.row}>
+        <Text style={styles.label}>Teléfono:</Text>
+        <Text style={styles.input}>{debtorPhone}</Text>
+      </View>
+    )}
   </View>
 );
 
-// Guarantor Info Component
+// Guarantor Info Component - Card style matching debtor (without signature)
 const GuarantorInfo: React.FC<{ guarantors: Guarantor[] }> = ({ guarantors }) => (
   <View style={styles.guarantorInfo}>
     {guarantors.map((guarantor, index) => (
       <View key={index}>
-        <Text style={[styles.label, { marginBottom: 2 }]}>Aval {index + 1}:</Text>
+        <Text style={[styles.label, { marginBottom: 6, fontSize: 9 }]}>
+          DATOS DEL AVAL {guarantors.length > 1 ? index + 1 : ""}
+        </Text>
         <View style={styles.row}>
-          <Text style={[styles.label, { marginBottom: 2 }]}>Nombre: </Text>
+          <Text style={styles.label}>Nombre:</Text>
           <Text style={styles.input}>{guarantor.name}</Text>
         </View>
         <View style={styles.combinedRow}>
-          <Text style={[styles.label, { marginBottom: 2 }]}>Dirección: </Text>
+          <Text style={styles.label}>Dirección:</Text>
           <Text style={styles.addressInput}>{guarantor.address}</Text>
-          <Text style={styles.label}>Población:  </Text>
+          <Text style={styles.label}>Población:</Text>
           <Text style={styles.cityInput}>{guarantor.city}</Text>
         </View>
-        <View style={styles.row}>
-          <Text style={[styles.label, { marginBottom: 3 }]}>Tel: </Text>
-          <Text style={styles.input}>{guarantor.phone}</Text>
-        </View>
-        <View style={styles.guarantorSignature}>
-          <Text style={styles.guarantorSignatureText}>
-            Firma del Aval {index + 1}: ________________________
-          </Text>
-        </View>
+        {guarantor.phone && (
+          <View style={styles.row}>
+            <Text style={styles.label}>Teléfono:</Text>
+            <Text style={styles.input}>{guarantor.phone}</Text>
+          </View>
+        )}
       </View>
     ))}
   </View>
 );
 
-// Signature Component
-const Signature: React.FC<{ hasGuarantor: boolean }> = ({ hasGuarantor }) => (
-  <View style={styles.signature}>
-    <Text style={{ marginBottom: hasGuarantor ? 15 : 15 }}>
-      Firma del Deudor
-    </Text>
+// Signature Component - Only debtor signature (no guarantor)
+const Signature: React.FC = () => (
+  <View style={styles.signatureContainer}>
+    <View style={styles.signature}>
+      <Text>Firma del Deudor</Text>
+    </View>
   </View>
 );
 
-// PromissoryNote Component
+// Dual Signature Component - Debtor on left, Guarantor on right
+const DualSignature: React.FC = () => (
+  <View style={styles.dualSignatureContainer}>
+    <View style={styles.signatureBox}>
+      <Text style={styles.signatureText}>Firma del Deudor</Text>
+    </View>
+    <View style={styles.signatureBox}>
+      <Text style={styles.signatureText}>Firma del Aval</Text>
+    </View>
+  </View>
+);
+
+// Main PromissoryNote Component
 const PromissoryNote: React.FC<{
   data: PromissoryNoteData;
   noteNumber: number;
@@ -156,42 +168,49 @@ const PromissoryNote: React.FC<{
   return (
     <View style={hasGuarantor ? styles.pagareWithGuarantor : styles.pagareWithoutGuarantor}>
       <Header noteNumber={noteNumber} totalNotes={data.numberOfMonths} amount={data.amount} />
+
       <DateRow paymentPlace={data.payment_place} signingDate={data.signingDate} />
-      <Text style={[styles.label, { textAlign: "right" }]}>
+      <Text style={[styles.label, { textAlign: "right", fontSize: 7, marginBottom: 4 }]}>
         Lugar y fecha de expedición
       </Text>
+
       <MainText name={data.name} amount={data.amount} />
-      <TwoLineContainer paymentPlace={data.payment_place} dueDate={dueDate} />
-      <SmallText 
-        periodicity={data.periodicity} 
-        numberOfMonths={data.numberOfMonths} 
-        interestRate={data.interestRate} 
+
+      <PaymentDetails paymentPlace={data.payment_place} dueDate={dueDate} />
+
+      <TermsText
+        periodicity={data.periodicity}
+        numberOfMonths={data.numberOfMonths}
+        interestRate={data.interestRate}
       />
-      <DebtorInfo 
+
+      <DebtorInfo
         debtorName={data.debtorName}
         debtorAddress={data.debtorAddress}
         debtorCity={data.debtorCity}
         debtorPhone={data.debtorPhone}
       />
+
       {hasGuarantor && data.guarantors && data.guarantors.length > 0 && (
         <GuarantorInfo guarantors={data.guarantors} />
       )}
-      <Signature hasGuarantor={hasGuarantor} />
+
+      {hasGuarantor ? <DualSignature /> : <Signature />}
     </View>
   );
 };
 
-// PromissoryNotePDF Component
+// Document Component
 const PromissoryNotePDF: React.FC<{ data: PromissoryNoteData }> = ({ data }) => {
-  console.log("PromissoryNotePDF data:", data); // Para depuración
-
   if (!data || !data.numberOfMonths || data.numberOfMonths < 1) {
     console.error("Datos de pagaré inválidos", data);
     return (
       <Document>
         <Page size="LETTER">
-          <View>
-            <Text>Error: Datos de pagaré inválidos o incompletos</Text>
+          <View style={{ padding: 40 }}>
+            <Text style={{ fontSize: 14, color: "#c62828" }}>
+              Error: Datos de pagaré inválidos o incompletos
+            </Text>
           </View>
         </Page>
       </Document>
@@ -215,10 +234,10 @@ const PromissoryNotePDF: React.FC<{ data: PromissoryNoteData }> = ({ data }) => 
             const noteNumber = pageIndex * pagaresPerPage + i + 1;
             if (noteNumber <= data.numberOfMonths) {
               return (
-                <PromissoryNote 
-                  key={i} 
-                  data={data} 
-                  noteNumber={noteNumber} 
+                <PromissoryNote
+                  key={i}
+                  data={data}
+                  noteNumber={noteNumber}
                   hasGuarantor={hasGuarantor}
                 />
               );

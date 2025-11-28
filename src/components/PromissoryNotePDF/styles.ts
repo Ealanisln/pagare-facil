@@ -2,175 +2,274 @@
 
 import { StyleSheet } from "@react-pdf/renderer";
 
+// Color palette
+const colors = {
+  primary: "#1b5e20",
+  primaryLight: "#2e7d32",
+  primaryDark: "#0d3d13",
+  accent: "#e8f5e9",
+  border: "#1b5e20",
+  borderLight: "#a5d6a7",
+  text: "#1a1a1a",
+  textMuted: "#4a4a4a",
+  background: "#ffffff",
+  backgroundAlt: "#fafafa",
+};
+
 export const styles = StyleSheet.create({
+  // Page layouts
   pageWithoutGuarantor: {
     flexDirection: "column",
-    backgroundColor: "#ffffff",
-    padding: 10,
-    paddingTop: 10, // Aumenta el margen superior
+    backgroundColor: colors.background,
+    padding: 8,
+    paddingTop: 8,
   },
   pageWithGuarantor: {
     flexDirection: "column",
-    backgroundColor: "#ffffff",
-    padding: 10,
-    paddingTop: 15, // Aumenta el margen superior
+    backgroundColor: colors.background,
+    padding: 8,
+    paddingTop: 8,
   },
+
+  // Pagaré container
   pagareWithoutGuarantor: {
-    border: "0.5 solid #1b5e20",
-    borderRadius: 2,
-    padding: 9,
-    marginBottom: 10,
-    backgroundColor: "#fdfdfd",
+    border: `1.5 solid ${colors.primary}`,
+    padding: 8,
+    marginBottom: 6,
+    backgroundColor: colors.background,
     width: "100%",
+    height: 242, // ~1/3 of letter page height (792 - margins) / 3
+    flexDirection: "column",
   },
   pagareWithGuarantor: {
-    border: "0.5 solid #1b5e20",
-    borderRadius: 2,
-    padding: 7,
-    marginBottom: 15,
-    backgroundColor: "#fdfdfd",
+    border: `1.5 solid ${colors.primary}`,
+    padding: 8,
+    marginBottom: 8,
+    backgroundColor: colors.background,
     width: "100%",
+    height: 376, // ~1/2 of letter page height (792 - margins) / 2
+    flexDirection: "column",
   },
+
+  // Header section
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    color: "black",
-    padding: 7,
-    marginBottom: 5,
-    borderRadius: 4,
-    border: "1 solid #1b5e20",
+    backgroundColor: colors.primary,
+    color: colors.background,
+    padding: 6,
+    paddingHorizontal: 10,
+    marginBottom: 6,
   },
   headerText: {
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: "bold",
+    color: colors.background,
+    letterSpacing: 2,
   },
   headerRight: {
     flexDirection: "row",
     fontSize: 9,
     alignItems: "center",
+    color: colors.background,
   },
   headerRightItem: {
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
+    color: colors.background,
   },
   verticalLine: {
-    borderLeft: "0.5 solid #1b5e20",
-    height: "100%",
+    borderLeft: `1 solid ${colors.background}`,
+    height: 14,
+    opacity: 0.5,
   },
+
+  // Date row
   dateRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginBottom: 1,
+    marginBottom: 2,
+    paddingRight: 2,
   },
   dateText: {
     fontSize: 9,
     textAlign: "right",
+    color: colors.text,
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 5,
-  },
-  input: {
-    borderBottom: "0.5 solid #1b5e20",
-    flex: 1,
-    marginLeft: 2,
-    fontSize: 8,
-  },
+
+  // Main text content
   mainText: {
     fontSize: 8,
     marginVertical: 6,
+    lineHeight: 1.4,
+    color: colors.text,
+    textAlign: "justify",
   },
+
+  // Labels and inputs
   label: {
     fontSize: 8,
-    color: "#1b5e20",
+    color: colors.primary,
+    fontWeight: "bold",
   },
   smallText: {
-    fontSize: 7,
-    color: "#1b5e20",
-    marginBottom: 3,
+    fontSize: 6,
+    color: colors.textMuted,
+    marginBottom: 4,
+    marginTop: 2,
+    lineHeight: 1.3,
+    textAlign: "justify",
+    paddingHorizontal: 2,
   },
-  debtorInfo: {
-    border: "0.5 solid #1b5e20",
-    padding: 3,
-    marginTop: 3,
-  },
-  signature: {
+
+  // Row layouts
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 4,
     alignItems: "flex-end",
-    marginTop: 6,
-    marginBottom: 6,
-    fontSize: 9,
   },
+  input: {
+    borderBottom: `1 solid ${colors.borderLight}`,
+    flex: 1,
+    marginLeft: 4,
+    fontSize: 9,
+    paddingBottom: 2,
+    color: colors.text,
+  },
+
+  // Two column layout
   twoLineContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    marginBottom: 5,
+    marginBottom: 4,
+    gap: 20,
   },
   lineContainer: {
     flex: 1,
   },
   lineText: {
-    fontSize: 8,
-    borderBottom: "0.5 solid #1b5e20",
-    paddingBottom: 3,
+    fontSize: 9,
+    borderBottom: `1 solid ${colors.borderLight}`,
+    paddingBottom: 4,
+    color: colors.text,
   },
   lineLabel: {
-    fontSize: 8,
-    color: "#1b5e20",
+    fontSize: 7,
+    color: colors.primary,
     marginTop: 3,
+    fontWeight: "bold",
   },
+
+  // Debtor info section
+  debtorInfo: {
+    border: `1 solid ${colors.borderLight}`,
+    borderLeft: `3 solid ${colors.primary}`,
+    padding: 6,
+    marginTop: 4,
+    backgroundColor: colors.backgroundAlt,
+  },
+
+  // Signature section (single - centered, no line)
+  signatureContainer: {
+    marginTop: "auto",
+    marginBottom: 4,
+    alignItems: "center",
+    justifyContent: "flex-end",
+    flex: 1,
+  },
+  signature: {
+    alignItems: "center",
+    fontSize: 7,
+    color: colors.textMuted,
+  },
+
+  // Guarantor section
   guarantorInfo: {
-    border: "0.5 solid #1b5e20",
-    padding: 2,
-    marginTop: 5,
+    border: `1 solid ${colors.borderLight}`,
+    borderLeft: `3 solid ${colors.primary}`,
+    padding: 5,
+    marginTop: 4,
+    backgroundColor: colors.backgroundAlt,
   },
   guarantorTitle: {
-    fontSize: 7,
+    fontSize: 8,
     fontWeight: "bold",
-    color: "#1b5e20",
-    marginBottom: 3,
+    color: colors.primary,
+    marginBottom: 4,
   },
   inlineRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 3,
+    marginBottom: 4,
+    alignItems: "flex-end",
   },
   inlineLabel: {
     fontSize: 7,
-    color: "#1b5e20",
+    color: colors.primary,
+    fontWeight: "bold",
   },
   inlineInput: {
-    borderBottom: "0.5 solid #1b5e20",
+    borderBottom: `1 solid ${colors.borderLight}`,
     flex: 1,
-    marginLeft: 2,
+    marginLeft: 4,
     fontSize: 8,
+    paddingBottom: 2,
+    color: colors.text,
   },
-  guarantorSignature: {
-    marginTop: 12,
-    paddingTop: 5,
+  // Dual signature container (debtor left, guarantor right)
+  dualSignatureContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: "auto",
+    marginBottom: 4,
+    paddingHorizontal: 20,
   },
-  guarantorSignatureText: {
-    fontSize: 8,
-    color: "#1b5e20",
+  signatureBox: {
+    width: 180,
+    borderTop: `1 solid ${colors.borderLight}`,
+    paddingTop: 4,
+    alignItems: "center",
+  },
+  signatureText: {
+    fontSize: 7,
+    color: colors.textMuted,
     textAlign: "center",
-    marginBottom: 3,
   },
+
+  // Combined row for address/city
   combinedRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 2,
+    marginBottom: 4,
+    alignItems: "flex-end",
   },
   addressInput: {
-    borderBottom: "0.5 solid #1b5e20",
+    borderBottom: `1 solid ${colors.borderLight}`,
     flex: 2,
-    marginLeft: 2,
-    fontSize: 8,
+    marginLeft: 4,
+    marginRight: 12,
+    fontSize: 9,
+    paddingBottom: 2,
+    color: colors.text,
   },
   cityInput: {
-    borderBottom: "0.5 solid #1b5e20",
+    borderBottom: `1 solid ${colors.borderLight}`,
     flex: 1,
-    marginLeft: 2,
+    marginLeft: 4,
+    fontSize: 9,
+    paddingBottom: 2,
+    color: colors.text,
+  },
+
+  // Section title style
+  sectionTitle: {
     fontSize: 8,
+    fontWeight: "bold",
+    color: colors.primary,
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 });
