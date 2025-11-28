@@ -1,4 +1,5 @@
 // File: components/dashboard/ConfigurationCard.tsx
+import { Control } from "react-hook-form";
 import {
   Card,
   CardContent,
@@ -6,7 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -17,77 +25,127 @@ import {
 } from "@/components/ui/select";
 import { FullDatePicker } from "@/components/FullDatePicker";
 import { DatePicker } from "@/components/DatePicker";
+import { Calendar, CalendarDays, RefreshCw, Hash } from "lucide-react";
+import { PromissoryNoteFormData } from "@/lib/schemas";
+import { cn } from "@/lib/utils";
 
 interface ConfigurationCardProps {
-  signingDate: Date | undefined;
-  setSigningDate: (date: Date | undefined) => void;
-  paymentDay: number | undefined;
-  setPaymentDay: (day: number | undefined) => void;
-  periodicity: string;
-  setPeriodicity: (periodicity: string) => void;
-  numberOfMonths: number;
-  setNumberOfMonths: (months: number) => void;
+  control: Control<PromissoryNoteFormData>;
+  className?: string;
 }
 
 export function ConfigurationCard({
-  signingDate,
-  setSigningDate,
-  paymentDay,
-  setPaymentDay,
-  periodicity,
-  setPeriodicity,
-  numberOfMonths,
-  setNumberOfMonths,
+  control,
+  className,
 }: ConfigurationCardProps) {
   return (
-    <Card className="col-span-full lg:col-span-1">
-      <CardHeader>
-        <CardTitle>Configuración de pagarés</CardTitle>
-        <CardDescription>
-          Configura la periodicidad y número de pagarés a generar.
-        </CardDescription>
+    <Card variant="glass" className={cn("col-span-full xl:col-span-1", className)}>
+      <CardHeader className="flex flex-row items-start gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <span className="text-lg font-semibold">3</span>
+        </div>
+        <div>
+          <CardTitle>Configuracion</CardTitle>
+          <CardDescription>
+            Periodicidad y numero de pagares
+          </CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid gap-6">
-          <div className="grid gap-3">
-            <Label htmlFor="signing_date">Fecha del pagaré</Label>
-            <FullDatePicker
-              selected={signingDate}
-              onChange={(date) => setSigningDate(date)}
-            />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="payment_day">Día de pago</Label>
-            <DatePicker
-              selected={paymentDay}
-              onChange={(day) => setPaymentDay(day)}
-            />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="periodicity">Periodicidad</Label>
-            <Select onValueChange={setPeriodicity} value={periodicity}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona la periodicidad" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="weekly">Semanal</SelectItem>
-                <SelectItem value="biweekly">Quincenal</SelectItem>
-                <SelectItem value="monthly">Mensual</SelectItem>
-                <SelectItem value="quarterly">Trimestral</SelectItem>
-                <SelectItem value="semiannual">Semestral</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="number_of_months">Número de períodos</Label>
-            <Input
-              id="number_of_months"
-              type="number"
-              value={numberOfMonths}
-              onChange={(e) => setNumberOfMonths(parseInt(e.target.value))}
-              min="1"
-            />
-          </div>
+          <FormField
+            control={control}
+            name="signingDate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-foreground/70" />
+                  Fecha del pagare
+                </FormLabel>
+                <FormControl>
+                  <FullDatePicker
+                    selected={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormDescription>Fecha de firma del documento</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="paymentDay"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-foreground/70" />
+                  Dia de pago
+                </FormLabel>
+                <FormControl>
+                  <DatePicker selected={field.value} onChange={field.onChange} />
+                </FormControl>
+                <FormDescription>
+                  Dia del mes para los pagos
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="periodicity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <RefreshCw className="h-4 w-4 text-foreground/70" />
+                  Periodicidad
+                </FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona la periodicidad" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="weekly">Semanal</SelectItem>
+                    <SelectItem value="biweekly">Quincenal</SelectItem>
+                    <SelectItem value="monthly">Mensual</SelectItem>
+                    <SelectItem value="quarterly">Trimestral</SelectItem>
+                    <SelectItem value="semiannual">Semestral</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Frecuencia de los pagos
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="numberOfMonths"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="flex items-center gap-2">
+                  <Hash className="h-4 w-4 text-foreground/70" />
+                  Numero de periodos
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    min="1"
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Cantidad de pagares a generar
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </CardContent>
     </Card>

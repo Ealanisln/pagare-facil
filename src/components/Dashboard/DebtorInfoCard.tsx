@@ -1,42 +1,129 @@
 // File: components/dashboard/DebtorInfoCard.tsx
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+import { Control } from "react-hook-form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormDescription,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { User, Home, Building, Phone } from "lucide-react";
+import { PromissoryNoteFormData } from "@/lib/schemas";
+import { cn } from "@/lib/utils";
 
-export function DebtorInfoCard() {
+interface DebtorInfoCardProps {
+  control: Control<PromissoryNoteFormData>;
+  className?: string;
+}
+
+export function DebtorInfoCard({ control, className }: DebtorInfoCardProps) {
   return (
-    <Card className="col-span-full lg:col-span-1">
-      <CardHeader>
-        <CardTitle>Datos del deudor</CardTitle>
-        <CardDescription>
-          Ingresa los datos del deudor
-        </CardDescription>
+    <Card variant="glass" className={cn("col-span-full xl:col-span-1", className)}>
+      <CardHeader className="flex flex-row items-start gap-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          <span className="text-lg font-semibold">2</span>
+        </div>
+        <div>
+          <CardTitle>Datos del deudor</CardTitle>
+          <CardDescription>Informacion de la persona que debe</CardDescription>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid gap-6">
-          <div className="grid gap-3">
-            <Label htmlFor="debtname">Nombre del deudor:</Label>
-            <Input id="debtname" name="debtname" type="text" className="w-full" />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="debt_address">Dirección</Label>
-            <Input
-              id="debt_address"
-              name="debt_address"
-              type="text"
-              className="w-full"
-            />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="debt_city">Población</Label>
-            <Input id="debt_city" name="debt_city" className="w-full" />
-          </div>
-          <div className="grid gap-3">
-            <Label htmlFor="debt_phone">
-              Teléfono del deudor (Opcional)
-            </Label>
-            <Input id="debt_phone" name="debt_phone" type="tel" className="w-full" />
-          </div>
+          <FormField
+            control={control}
+            name="debtorName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nombre del deudor</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10 text-muted-foreground" />
+                    <Input
+                      className="pl-10"
+                      placeholder="Ej: Maria Garcia Martinez"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>Nombre completo del deudor</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="debtorAddress"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Direccion</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10 text-muted-foreground" />
+                    <Input
+                      className="pl-10"
+                      placeholder="Ej: Av. Constitucion 123"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>Direccion completa del deudor</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="debtorCity"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Poblacion</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10 text-muted-foreground" />
+                    <Input
+                      className="pl-10"
+                      placeholder="Ej: Guadalajara, Jalisco"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>Ciudad y estado del deudor</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={control}
+            name="debtorPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Telefono (opcional)</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 z-10 text-muted-foreground" />
+                    <Input
+                      className="pl-10"
+                      type="tel"
+                      placeholder="Ej: 55 1234 5678"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormDescription>Numero de contacto del deudor</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </CardContent>
     </Card>

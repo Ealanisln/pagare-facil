@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Pagaré fácil",
+  title: "Pagare Facil",
   description:
-    "Genera pagarés personalizados fácilmente. Proporciona una interfaz fácil de usar para ingresar información del deudor, condiciones de pago y detalles del garante, y genera un documento PDF descargable.",
+    "Genera pagares personalizados facilmente. Proporciona una interfaz facil de usar para ingresar informacion del deudor, condiciones de pago y detalles del garante, y genera un documento PDF descargable.",
 };
 
 export default function RootLayout({
@@ -16,8 +17,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="es" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
