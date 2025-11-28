@@ -35,8 +35,10 @@ export function numeroALetras(numero: number): string {
         if (numero % 10 !== 0) {
             letras += ' y ' + unidades[numero % 10];
         }
-    } else if (numero >= 10) {
-        letras += especiales[numero - 10];
+    } else if (numero === 10) {
+        letras += 'diez';
+    } else if (numero >= 11 && numero <= 19) {
+        letras += especiales[numero - 11];
     } else if (numero > 0) {
         letras += unidades[numero];
     }
