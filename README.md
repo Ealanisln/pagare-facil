@@ -1,80 +1,67 @@
-# Promissory Note Generator
+# Pagaré Fácil
 
-This is a [Next.js](https://nextjs.org/) project that allows users to generate customized promissory notes easily. It provides a user-friendly interface for inputting debtor information, payment terms, and guarantor details, and generates a downloadable PDF document.
+Generador de pagarés personalizados en formato PDF. App en español, diseñada para documentos legales mexicanos.
 
-## Features
+## Características
 
-- Easy-to-use form for inputting promissory note details
-- Support for multiple guarantors
-- Dynamic form fields that adjust based on user input
-- PDF generation and download functionality
-- Responsive design for various screen sizes
+- Formulario guiado para datos generales, deudor, configuración de pago y aval (opcional)
+- Periodicidades soportadas: semanal, quincenal, mensual, trimestral y semestral
+- Cálculo automático de la primera fecha de pago según periodicidad y día seleccionado
+- Conversión de montos a letra en español
+- Generación y descarga de PDF con múltiples pagarés por hoja
+- Modo claro / oscuro
+- Validación con Zod y react-hook-form
 
-## Getting Started
+## Stack
 
-First, clone the repository and install the dependencies:
+- **Framework**: Next.js 15 (App Router)
+- **UI**: shadcn/ui sobre Radix, Tailwind CSS
+- **PDF**: `@react-pdf/renderer`
+- **Formularios**: `react-hook-form` + `zod`
+- **Fechas**: `date-fns`, `react-day-picker`
+- **Tests**: Vitest + Testing Library (unit), Playwright (e2e)
+
+## Comandos
 
 ```bash
-git clone https://github.com/your-username/promissory-note-generator.git
-cd promissory-note-generator
-npm install
+pnpm dev            # servidor de desarrollo
+pnpm build          # build de producción
+pnpm start          # servidor de producción
+pnpm lint           # ESLint
+pnpm test           # Vitest en modo watch
+pnpm test:run       # Vitest una sola vez
+pnpm test:coverage  # Vitest con cobertura
+pnpm test:e2e       # Playwright
+pnpm test:e2e:ui    # Playwright con UI
 ```
 
-Then, run the development server:
+## Estructura
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+src/
+├── app/                    # App Router (layout, página principal)
+├── components/
+│   ├── Dashboard.tsx       # formulario principal
+│   ├── Dashboard/          # subcomponentes (tarjetas del formulario)
+│   ├── PromissoryNotePDF/  # generación del PDF
+│   ├── DatePicker/         # selector de día del mes
+│   ├── FullDatePicker/     # selector de fecha completa
+│   └── ui/                 # componentes shadcn/ui
+├── lib/
+│   ├── schemas.ts          # esquemas Zod (PromissoryNote, Guarantor)
+│   ├── number-to-letter.ts # conversión de número a letras
+│   └── utils.ts            # helpers (cn, etc.)
+└── providers/              # ThemeProvider
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Alias de import: `@/*` → `src/*`.
 
-## Usage
+## Uso
 
-1. Fill out the form with the required information:
-   - General information (payee name, amount, interest rate, payment place)
-   - Debtor information (name, address, city, phone - optional)
-   - Payment terms (signing date, payment day, number of months)
-   - Guarantor information (optional)
+1. Llenar el formulario: información general (beneficiario, monto, interés, lugar de pago), datos del deudor, configuración de pagos y, opcionalmente, aval.
+2. Click en **Validar y generar PDF**.
+3. Descargar el PDF desde el diálogo.
 
-2. Click the "Validar y generar PDF" button to generate the promissory note.
+## Licencia
 
-3. If the form is valid, a dialog will appear with a "Descargar PDF" button.
-
-4. Click the "Descargar PDF" button to download the generated promissory note as a PDF file.
-
-## Customization
-
-You can customize the form fields, validation rules, and PDF layout by modifying the following files:
-
-- `app/page.tsx`: Main component containing the form and logic
-- `components/PromissoryNotePDF.tsx`: PDF generation component
-- Schema definitions in `app/page.tsx` for form validation
-
-## Learn More
-
-To learn more about the technologies used in this project, check out the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [React Documentation](https://reactjs.org/docs/getting-started.html) - learn about React.
-- [Zod Documentation](https://github.com/colinhacks/zod) - learn about Zod, the TypeScript-first schema validation library used in this project.
-- [React-PDF Documentation](https://react-pdf.org/) - learn about React-PDF, used for generating PDF documents.
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
+MIT
