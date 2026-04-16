@@ -3,6 +3,7 @@
 import * as React from "react"
 import { CalendarIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
+import { es } from "date-fns/locale"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -34,7 +35,7 @@ export function FullDatePicker({ selected, onChange, testId }: FullDatePickerPro
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {selected ? format(selected, "PPP") : <span>Select a date</span>}
+          {selected ? format(selected, "PPP", { locale: es }) : <span>Selecciona una fecha</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
@@ -45,6 +46,8 @@ export function FullDatePicker({ selected, onChange, testId }: FullDatePickerPro
             onChange(date);
             if (date) setOpen(false);
           }}
+          defaultMonth={selected ?? undefined}
+          locale={es}
           initialFocus
         />
       </PopoverContent>
