@@ -38,11 +38,11 @@ export function Dashboard() {
       signingDate: undefined,
       firstPaymentDate: undefined,
       periodicity: "monthly",
-      numberOfMonths: 1,
+      numberOfMonths: undefined,
       numberOfGuarantors: 0,
       guarantors: [],
     },
-    mode: "onBlur",
+    mode: "onTouched",
   });
 
   const onSubmit = (data: PromissoryNoteFormData) => {

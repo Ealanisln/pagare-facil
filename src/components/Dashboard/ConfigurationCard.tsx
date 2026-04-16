@@ -139,10 +139,13 @@ export function ConfigurationCard({
                   <Input
                     type="text"
                     inputMode="numeric"
+                    placeholder="Ej: 12"
                     name={field.name}
                     ref={field.ref}
                     onBlur={field.onBlur}
-                    value={field.value ?? ""}
+                    value={
+                      field.value !== undefined ? String(field.value) : ""
+                    }
                     onChange={(e) => {
                       const v = e.target.value;
                       if (v === "") {
