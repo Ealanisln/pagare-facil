@@ -163,6 +163,40 @@ describe('PromissoryNoteSchema', () => {
     })
   })
 
+  describe('mensajes de error en español', () => {
+    it('muestra mensaje en español cuando falta amount', () => {
+      const { amount, ...noteWithoutAmount } = validNote
+      const result = PromissoryNoteSchema.safeParse(noteWithoutAmount)
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const amountError = result.error.issues.find((i) => i.path[0] === 'amount')
+        expect(amountError?.message).toBe('El monto es requerido')
+      }
+    })
+
+    it('muestra mensaje en español cuando falta interestRate', () => {
+      const { interestRate, ...noteWithoutRate } = validNote
+      const result = PromissoryNoteSchema.safeParse(noteWithoutRate)
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const rateError = result.error.issues.find((i) => i.path[0] === 'interestRate')
+        expect(rateError?.message).toBe('La tasa de interes es requerida')
+      }
+    })
+
+    it('muestra mensaje en español cuando falta numberOfMonths', () => {
+      const { numberOfMonths, ...noteWithoutMonths } = validNote
+      const result = PromissoryNoteSchema.safeParse(noteWithoutMonths)
+      expect(result.success).toBe(false)
+      if (!result.success) {
+        const monthsError = result.error.issues.find(
+          (i) => i.path[0] === 'numberOfMonths',
+        )
+        expect(monthsError?.message).toBe('El numero de periodos es requerido')
+      }
+    })
+  })
+
   describe('validación de campos requeridos', () => {
     it('falla si falta name', () => {
       const { name, ...noteWithoutName } = validNote
