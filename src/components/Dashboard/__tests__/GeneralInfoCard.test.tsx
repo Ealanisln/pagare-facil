@@ -71,6 +71,10 @@ describe("GeneralInfoCard", () => {
     expect(
       screen.getByText("El lugar de pago es requerido"),
     ).toBeInTheDocument();
+    expect(screen.getByText("El monto es requerido")).toBeInTheDocument();
+    expect(
+      screen.getByText("La tasa de interes es requerida"),
+    ).toBeInTheDocument();
   });
 
   it("only accepts amounts with up to 2 decimals", () => {

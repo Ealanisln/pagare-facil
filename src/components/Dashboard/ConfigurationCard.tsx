@@ -139,8 +139,14 @@ export function ConfigurationCard({
                   <Input
                     type="number"
                     min="1"
-                    {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                    name={field.name}
+                    ref={field.ref}
+                    onBlur={field.onBlur}
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      field.onChange(v === "" ? undefined : parseInt(v, 10));
+                    }}
                   />
                 </FormControl>
                 <FormDescription>
