@@ -44,6 +44,11 @@ function Harness({
 }
 
 describe("ConfigurationCard", () => {
+  const getPeriodsInput = () =>
+    document.querySelector<HTMLInputElement>(
+      'input[name="numberOfMonths"]',
+    )!;
+
   it("renders both date pickers, periodicity select and number input", () => {
     render(<Harness />);
 
@@ -51,7 +56,7 @@ describe("ConfigurationCard", () => {
     expect(screen.getByText("Fecha del primer pago")).toBeInTheDocument();
     expect(screen.getByText("Periodicidad")).toBeInTheDocument();
     expect(screen.getByText("Numero de periodos")).toBeInTheDocument();
-    expect(screen.getByRole("spinbutton")).toBeInTheDocument();
+    expect(getPeriodsInput()).toBeInTheDocument();
   });
 
   it("defaults periodicity to Mensual", () => {
@@ -63,8 +68,19 @@ describe("ConfigurationCard", () => {
   it("accepts a valid number of periods", () => {
     render(<Harness />);
 
-    const input = screen.getByRole("spinbutton") as HTMLInputElement;
+    const input = getPeriodsInput();
     fireEvent.change(input, { target: { value: "6" } });
     expect(input.value).toBe("6");
+  });
+
+  it("ignores non-numeric input", () => {
+    render(<Harness />);
+
+    const input = getPeriodsInput();
+    fireEvent.change(input, { target: { value: "12" } });
+    expect(input.value).toBe("12");
+    fireEvent.change(input, { target: { value: "12a" } });
+    // Invalid characters are ignored; value stays at last valid entry.
+    expect(input.value).toBe("12");
   });
 });

@@ -137,15 +137,19 @@ export function ConfigurationCard({
                 </FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
-                    min="1"
+                    type="text"
+                    inputMode="numeric"
                     name={field.name}
                     ref={field.ref}
                     onBlur={field.onBlur}
                     value={field.value ?? ""}
                     onChange={(e) => {
                       const v = e.target.value;
-                      field.onChange(v === "" ? undefined : parseInt(v, 10));
+                      if (v === "") {
+                        field.onChange(undefined);
+                      } else if (/^\d+$/.test(v)) {
+                        field.onChange(parseInt(v, 10));
+                      }
                     }}
                   />
                 </FormControl>
