@@ -42,12 +42,11 @@ describe('PromissoryNoteSchema', () => {
     debtorAddress: 'Av. Reforma 456',
     debtorCity: 'Ciudad de México',
     signingDate: new Date('2024-01-15'),
-    paymentDay: 15,
+    firstPaymentDate: new Date('2024-02-15'),
     periodicity: 'monthly' as const,
     numberOfMonths: 12,
     numberOfGuarantors: 0,
     guarantors: [],
-    firstPaymentDate: new Date('2024-02-15'),
   }
 
   it('valida un pagaré completo', () => {
@@ -115,35 +114,26 @@ describe('PromissoryNoteSchema', () => {
     })
   })
 
-  describe('validación de paymentDay', () => {
-    it('falla con paymentDay de 0', () => {
-      const result = PromissoryNoteSchema.safeParse({
-        ...validNote,
-        paymentDay: 0,
-      })
+  describe('validación de firstPaymentDate', () => {
+    it('falla si falta firstPaymentDate', () => {
+      const { firstPaymentDate, ...noteWithoutDate } = validNote
+      const result = PromissoryNoteSchema.safeParse(noteWithoutDate)
       expect(result.success).toBe(false)
     })
 
-    it('falla con paymentDay mayor a 31', () => {
+    it('acepta una fecha futura posterior a la firma', () => {
       const result = PromissoryNoteSchema.safeParse({
         ...validNote,
-        paymentDay: 32,
-      })
-      expect(result.success).toBe(false)
-    })
-
-    it('acepta paymentDay de 1', () => {
-      const result = PromissoryNoteSchema.safeParse({
-        ...validNote,
-        paymentDay: 1,
+        signingDate: new Date('2026-04-16'),
+        firstPaymentDate: new Date('2026-05-01'),
       })
       expect(result.success).toBe(true)
     })
 
-    it('acepta paymentDay de 31', () => {
+    it('acepta cualquier Date válida (incluso anterior a la firma)', () => {
       const result = PromissoryNoteSchema.safeParse({
         ...validNote,
-        paymentDay: 31,
+        firstPaymentDate: new Date('2023-12-01'),
       })
       expect(result.success).toBe(true)
     })

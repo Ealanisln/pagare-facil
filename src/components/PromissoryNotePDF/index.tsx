@@ -163,7 +163,7 @@ const PromissoryNote: React.FC<{
   noteNumber: number;
   hasGuarantor: boolean;
 }> = ({ data, noteNumber, hasGuarantor }) => {
-  const dueDate = calculateDueDate(data.firstPaymentDate, noteNumber, data.periodicity, data.paymentDay);
+  const dueDate = calculateDueDate(data.firstPaymentDate, noteNumber, data.periodicity);
 
   return (
     <View style={hasGuarantor ? styles.pagareWithGuarantor : styles.pagareWithoutGuarantor}>

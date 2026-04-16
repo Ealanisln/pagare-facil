@@ -36,7 +36,7 @@ export function Dashboard() {
       debtorCity: "",
       debtorPhone: "",
       signingDate: undefined,
-      paymentDay: undefined,
+      firstPaymentDate: undefined,
       periodicity: "monthly",
       numberOfMonths: 1,
       numberOfGuarantors: 0,
@@ -45,53 +45,11 @@ export function Dashboard() {
     mode: "onBlur",
   });
 
-  const calculateFirstPaymentDate = (
-    signingDate: Date,
-    paymentDay: number,
-    periodicity: string
-  ) => {
-    const firstPaymentDate = new Date(signingDate);
-    firstPaymentDate.setDate(paymentDay);
-
-    while (firstPaymentDate <= signingDate) {
-      switch (periodicity) {
-        case "weekly":
-          firstPaymentDate.setDate(firstPaymentDate.getDate() + 7);
-          break;
-        case "biweekly":
-          firstPaymentDate.setDate(firstPaymentDate.getDate() + 14);
-          break;
-        case "monthly":
-          firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 1);
-          break;
-        case "quarterly":
-          firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 3);
-          break;
-        case "semiannual":
-          firstPaymentDate.setMonth(firstPaymentDate.getMonth() + 6);
-          break;
-      }
-    }
-
-    return firstPaymentDate;
-  };
-
   const onSubmit = (data: PromissoryNoteFormData) => {
     setIsGeneratingPDF(true);
 
     try {
-      const firstPaymentDate = calculateFirstPaymentDate(
-        data.signingDate,
-        data.paymentDay,
-        data.periodicity
-      );
-
-      const validatedData: PromissoryNote = {
-        ...data,
-        firstPaymentDate,
-      };
-
-      setFormData(validatedData);
+      setFormData(data);
       setIsDialogOpen(true);
     } finally {
       setIsGeneratingPDF(false);

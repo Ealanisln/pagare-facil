@@ -24,7 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FullDatePicker } from "@/components/FullDatePicker";
-import { DatePicker } from "@/components/DatePicker";
 import { Calendar, CalendarDays, RefreshCw, Hash } from "lucide-react";
 import { PromissoryNoteFormData } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
@@ -66,6 +65,7 @@ export function ConfigurationCard({
                   <FullDatePicker
                     selected={field.value}
                     onChange={field.onChange}
+                    testId="signing-date-picker"
                   />
                 </FormControl>
                 <FormDescription>Fecha de firma del documento</FormDescription>
@@ -75,18 +75,22 @@ export function ConfigurationCard({
           />
           <FormField
             control={control}
-            name="paymentDay"
+            name="firstPaymentDate"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="flex items-center gap-2">
                   <CalendarDays className="h-4 w-4 text-foreground/70" />
-                  Dia de pago
+                  Fecha del primer pago
                 </FormLabel>
                 <FormControl>
-                  <DatePicker selected={field.value} onChange={field.onChange} />
+                  <FullDatePicker
+                    selected={field.value}
+                    onChange={field.onChange}
+                    testId="first-payment-date-picker"
+                  />
                 </FormControl>
                 <FormDescription>
-                  Dia del mes para los pagos
+                  Fecha exacta en que vence el primer pagare
                 </FormDescription>
                 <FormMessage />
               </FormItem>

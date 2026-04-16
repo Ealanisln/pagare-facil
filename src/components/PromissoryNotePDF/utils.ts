@@ -16,10 +16,9 @@ export type Guarantor = {
     debtorPhone?: string;
     name: string;
     numberOfMonths: number;
-    paymentDay: number;
     payment_place: string;
     signingDate: Date;
-    firstPaymentDate: Date; 
+    firstPaymentDate: Date;
     numberOfGuarantors: number;
     guarantors: Guarantor[];
     periodicity: "weekly" | "biweekly" | "monthly" | "quarterly" | "semiannual";
@@ -40,9 +39,10 @@ export type Guarantor = {
     return `${day} de ${month} de ${year}`;
   };
   
-  export const calculateDueDate = (firstPaymentDate: Date, noteNumber: number, periodicity: string, paymentDay: number): Date => {
+  export const calculateDueDate = (firstPaymentDate: Date, noteNumber: number, periodicity: string): Date => {
     let dueDate = new Date(firstPaymentDate);
-    
+    const paymentDay = firstPaymentDate.getDate();
+
     switch (periodicity) {
       case "weekly":
         dueDate.setDate(dueDate.getDate() + (noteNumber - 1) * 7);
@@ -60,12 +60,12 @@ export type Guarantor = {
         dueDate.setMonth(dueDate.getMonth() + (noteNumber - 1) * 6);
         break;
     }
-  
+
     if (periodicity !== "weekly" && periodicity !== "biweekly") {
       const lastDayOfMonth = new Date(dueDate.getFullYear(), dueDate.getMonth() + 1, 0).getDate();
       dueDate.setDate(Math.min(paymentDay, lastDayOfMonth));
     }
-  
+
     return dueDate;
   };
   

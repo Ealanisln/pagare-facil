@@ -16,14 +16,18 @@ import {
 interface FullDatePickerProps {
   selected: Date | undefined;
   onChange: (date: Date | undefined) => void;
+  testId?: string;
 }
 
-export function FullDatePicker({ selected, onChange }: FullDatePickerProps) {
+export function FullDatePicker({ selected, onChange, testId }: FullDatePickerProps) {
+  const [open, setOpen] = React.useState(false);
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
+          data-testid={testId}
           className={cn(
             "w-[240px] justify-start text-left font-normal",
             !selected && "text-muted-foreground"
@@ -37,7 +41,10 @@ export function FullDatePicker({ selected, onChange }: FullDatePickerProps) {
         <Calendar
           mode="single"
           selected={selected}
-          onSelect={onChange}
+          onSelect={(date) => {
+            onChange(date);
+            if (date) setOpen(false);
+          }}
           initialFocus
         />
       </PopoverContent>

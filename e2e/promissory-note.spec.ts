@@ -1,4 +1,27 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
+
+/**
+ * Picks a date in a FullDatePicker identified by its data-testid.
+ * Waits for the calendar dialog to open and close so consecutive date picks don't
+ * race on overlapping popovers.
+ */
+async function pickDate(
+  page: Page,
+  testId: string,
+  day: string,
+  monthsForward = 0,
+) {
+  await page.getByTestId(testId).click()
+  const dialog = page.getByRole('dialog').last()
+  await dialog.waitFor({ state: 'visible' })
+  for (let i = 0; i < monthsForward; i++) {
+    const caption = await dialog.getByRole('status').textContent()
+    await dialog.getByRole('button', { name: /next month/i }).click()
+    await expect(dialog.getByRole('status')).not.toHaveText(caption ?? '')
+  }
+  await dialog.getByRole('gridcell').getByText(day, { exact: true }).click()
+  await dialog.waitFor({ state: 'hidden' })
+}
 
 test.describe('Pagare Facil - Generacion de Pagares', () => {
   test.beforeEach(async ({ page }) => {
@@ -26,12 +49,9 @@ test.describe('Pagare Facil - Generacion de Pagares', () => {
     await page.getByPlaceholder('Ej: 55 1234 5678').fill('5551234567')
 
     // Configuracion - Fecha del pagare
-    await page.getByRole('button', { name: 'Select a date' }).click()
-    await page.getByRole('gridcell', { name: '15' }).first().click()
-
-    // Configuracion - Dia de pago
-    await page.getByRole('button', { name: 'Selecciona el día' }).click()
-    await page.getByRole('gridcell', { name: '15' }).first().click()
+    await pickDate(page, 'signing-date-picker', '15')
+    // Configuracion - Fecha del primer pago
+    await pickDate(page, 'first-payment-date-picker', '20')
 
     // Numero de periodos
     await page.getByRole('spinbutton').last().clear()
@@ -41,6 +61,30 @@ test.describe('Pagare Facil - Generacion de Pagares', () => {
     await page.getByRole('button', { name: 'Validar y generar PDF' }).click()
 
     // Verificar que el dialogo de PDF se abre
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10000 })
+  })
+
+  test('permite elegir primer pago en un mes distinto al mes actual', async ({ page }) => {
+    // Escenario del bug: el usuario debe poder elegir una fecha de primer pago
+    // en un mes diferente (p.ej. siguiente mes) al mes de firma.
+    // Llenar campos minimos requeridos
+    await page.getByPlaceholder('Ej: Juan Perez Lopez').fill('Juan Perez Garcia')
+    await page.getByPlaceholder('0.00').first().fill('10000')
+    await page.getByPlaceholder('0.00').nth(1).fill('5')
+    await page.getByPlaceholder('Ej: Monterrey, Nuevo Leon').fill('Ciudad de Mexico')
+    await page.getByPlaceholder('Ej: Maria Garcia Martinez').fill('Maria Lopez Sanchez')
+    await page.getByPlaceholder('Ej: Av. Constitucion 123').fill('Av. Reforma 123')
+    await page.getByPlaceholder('Ej: Guadalajara, Jalisco').fill('Ciudad de Mexico')
+
+    // Fecha de firma: dia 15 del mes actual
+    await pickDate(page, 'signing-date-picker', '15')
+    // Fecha del primer pago: avanzar al siguiente mes y elegir dia 10
+    await pickDate(page, 'first-payment-date-picker', '10', 1)
+
+    // Submit
+    await page.getByRole('button', { name: 'Validar y generar PDF' }).click()
+
+    // Dialogo abre => formulario valido con primer pago en mes distinto
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 10000 })
   })
 

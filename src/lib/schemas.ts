@@ -17,7 +17,7 @@ export const PromissoryNoteSchema = z.object({
   debtorAddress: z.string().min(1, "La direccion del deudor es requerida"),
   debtorCity: z.string().min(1, "La ciudad del deudor es requerida"),
   signingDate: z.date({ required_error: "La fecha de firma es requerida" }),
-  paymentDay: z.number().min(1, "El dia debe ser mayor a 0").max(31, "El dia no puede ser mayor a 31"),
+  firstPaymentDate: z.date({ required_error: "La fecha del primer pago es requerida" }),
   periodicity: z.enum([
     "weekly",
     "biweekly",
@@ -29,11 +29,9 @@ export const PromissoryNoteSchema = z.object({
   numberOfGuarantors: z.number(),
   guarantors: z.array(GuarantorSchema),
   debtorPhone: z.string().optional(),
-  firstPaymentDate: z.date(),
 });
 
-// Schema for the form (without computed fields)
-export const PromissoryNoteFormSchema = PromissoryNoteSchema.omit({ firstPaymentDate: true });
+export const PromissoryNoteFormSchema = PromissoryNoteSchema;
 
 export type Guarantor = z.infer<typeof GuarantorSchema>;
 export type PromissoryNote = z.infer<typeof PromissoryNoteSchema>;
